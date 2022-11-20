@@ -13,6 +13,10 @@
   #include "udp_receiver.hpp"
 #endif
 
+#ifdef UDP_GATEWAY
+  #include "esp_now_receiver.hpp"
+#endif
+
 class App
 {
   private:
@@ -23,6 +27,10 @@ class App
     
     #ifdef UDP_GATEWAY
       static UDPReceiver udp;
+    #endif
+
+    #ifdef ESP_NOW_GATEWAY
+      static ESPNowReceiver esp_now;
     #endif
 
     static xTaskHandle task;

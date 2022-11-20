@@ -1,6 +1,8 @@
 #include "esp_log.h"
 #include "esp_netif.h"
 
+#include "config.hpp"
+#include "secret.hpp"
 #include "wifi.hpp"
 
 // Class variables
@@ -17,7 +19,11 @@ Wifi::Wifi(void)
 {
   mac_addr_cstr[0] = 0;
   wifi_init_cfg    = WIFI_INIT_CONFIG_DEFAULT();
-  wifi_cfg         = {};
+  memset(&wifi_sta_cfg, 0, sizeof(wifi_config_t));
+
+  #ifdef ESP_NOW_GATEWAY
+    memset(&wifi_ap_cfg, 0, sizeof(wifi_config_t));
+  #endif
 }
 
 void Wifi::wifi_event_handler(void             * arg, 
@@ -39,7 +45,7 @@ void Wifi::wifi_event_handler(void             * arg,
 
       case WIFI_EVENT_STA_CONNECTED: {
         std::lock_guard<std::mutex> state_guard(mutex);
-        State::WAITING_FOR_IP;
+        state = State::WAITING_FOR_IP;
         show_state();
         break;
       }
@@ -145,13 +151,11 @@ esp_err_t Wifi::connect(void)
   return status;
 }
 
-esp_err_t Wifi::init(const char * ssid, const char * password)
+esp_err_t Wifi::init()
 {
   std::lock_guard<std::mutex> mutx_guard(mutex);
 
   esp_err_t status = ESP_OK;
-
-  set_credentials(ssid, password);
 
   if (mac_addr_cstr[0] == 0) {
     if ((status = retrieve_mac()) != ESP_OK) {
@@ -163,12 +167,22 @@ esp_err_t Wifi::init(const char * ssid, const char * password)
   if (state == State::NOT_INITIALIZED) {
     status = esp_netif_init();
     if (status == ESP_OK) {
-      const esp_netif_t * const p_netif = esp_netif_create_default_wifi_sta();
+      const esp_netif_t * const sta_netif = esp_netif_create_default_wifi_sta();
 
-      if (p_netif == nullptr) {
+      if (sta_netif == nullptr) {
         ESP_LOGE(TAG, "Unable to create default wifi STA.");
         status = ESP_FAIL;
       }
+
+      #ifdef ESP_NOW_GATEWAY
+        const esp_netif_t * const ap_netif = esp_netif_create_default_wifi_ap();
+
+        if (ap_netif == nullptr) {
+          ESP_LOGE(TAG, "Unable to create default wifi AP.");
+          status = ESP_FAIL;
+        }
+
+      #endif
     }
 
     if (status == ESP_OK) {
@@ -192,19 +206,45 @@ esp_err_t Wifi::init(const char * ssid, const char * password)
     }
 
     if (status == ESP_OK) {
-      if ((status = esp_wifi_set_mode(WIFI_MODE_STA)) != ESP_OK) {
-        ESP_LOGE(TAG, "Unable to set wifi mode to STA: %s", esp_err_to_name(status));
-      }
+      #ifdef ESP_NOW_GATEWAY
+        if ((status = esp_wifi_set_mode(WIFI_MODE_APSTA)) != ESP_OK) {
+          ESP_LOGE(TAG, "Unable to set wifi mode to APSTA: %s", esp_err_to_name(status));
+        }
+      #else
+        if ((status = esp_wifi_set_mode(WIFI_MODE_STA)) != ESP_OK) {
+          ESP_LOGE(TAG, "Unable to set wifi mode to STA: %s", esp_err_to_name(status));
+        }        
+      #endif
     }
 
     if (status == ESP_OK) {
-      wifi_cfg.sta.threshold.authmode = WIFI_AUTH_WPA2_PSK;
-      wifi_cfg.sta.pmf_cfg.capable    = true;
-      wifi_cfg.sta.pmf_cfg.required   = false;
+      wifi_sta_cfg.sta.threshold.authmode = WIFI_STA_AUTH_MODE;
+      wifi_sta_cfg.sta.pmf_cfg.capable    = true;
+      wifi_sta_cfg.sta.pmf_cfg.required   = false;
+      memcpy(wifi_sta_cfg.sta.ssid,     WIFI_STA_SSID, std::min(strlen(WIFI_STA_SSID),     sizeof(wifi_sta_cfg.sta.ssid)));
+      memcpy(wifi_sta_cfg.sta.password, WIFI_STA_PASS, std::min(strlen(WIFI_STA_PASS), sizeof(wifi_sta_cfg.sta.password)));
 
-      if ((status = esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg)) != ESP_OK) {
-        ESP_LOGE(TAG, "Unable to set config: %s", esp_err_to_name(status));
+      if ((status = esp_wifi_set_config(WIFI_IF_STA, &wifi_sta_cfg)) != ESP_OK) {
+        ESP_LOGE(TAG, "Unable to set STA config: %s", esp_err_to_name(status));
       }
+      #ifdef ESP_NOW_GATEWAY
+        else {
+          memcpy(wifi_ap_cfg.ap.ssid,     WIFI_AP_SSID, std::min(strlen(WIFI_AP_SSID),     sizeof(wifi_ap_cfg.ap.ssid)));
+          memcpy(wifi_ap_cfg.ap.password, WIFI_AP_PASS, std::min(strlen(WIFI_AP_PASS), sizeof(wifi_ap_cfg.ap.password)));
+          wifi_ap_cfg.ap.authmode       = WIFI_AP_AUTH_MODE;
+          wifi_ap_cfg.ap.ssid_len       = strlen(WIFI_AP_SSID);
+          wifi_ap_cfg.ap.max_connection = ESP_NOW_MAX_CONNECTIONS;
+          wifi_ap_cfg.ap.channel        = ESP_NOW_AP_CHANNEL;
+
+          if (strlen(WIFI_AP_PASS) == 0) {
+            wifi_ap_cfg.ap.authmode = WIFI_AUTH_OPEN;
+          }
+
+          if ((status = esp_wifi_set_config(WIFI_IF_AP, &wifi_ap_cfg)) != ESP_OK) {
+            ESP_LOGE(TAG, "Unable to set AP config: %s", esp_err_to_name(status));
+          }
+        }
+      #endif
     }
 
     if (status == ESP_OK) {
@@ -226,14 +266,12 @@ esp_err_t Wifi::init(const char * ssid, const char * password)
 
 void Wifi::set_credentials(const char *ssid, const char *password)
 {
-  memcpy(wifi_cfg.sta.ssid,     ssid,     std::min(strlen(ssid),     sizeof(wifi_cfg.sta.ssid)));
-  memcpy(wifi_cfg.sta.password, password, std::min(strlen(password), sizeof(wifi_cfg.sta.password)));
 }
 
 // Get default MAC from API and convert to ASCII HEX
 esp_err_t Wifi::retrieve_mac(void)
 {
-  const esp_err_t status = esp_efuse_mac_get_default(mac_addr);
+  const esp_err_t status = esp_read_mac(mac_addr, ESP_MAC_WIFI_SOFTAP);
 
   if (status == ESP_OK) {
     snprintf(mac_addr_cstr, sizeof(mac_addr_cstr), "%02X:%02X:%02X:%02X:%02X:%02X",

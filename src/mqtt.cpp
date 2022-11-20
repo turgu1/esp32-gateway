@@ -2,20 +2,19 @@
 
 #include "mqtt.hpp"
 #include "config.hpp"
+#include "secret.hpp"
 
 // Class variables
 
 std::mutex         MQTT::mutex           = {};
 MQTT::State        MQTT::state           = State::NOT_INITIALIZED;
 
-esp_err_t MQTT::init(const char * username, const char * id, const char * password)
+esp_err_t MQTT::init()
 {
-  set_credentials(username, id, password);
-  
   mqtt_cfg.uri       = MQTT_SERVER_URI;
-  mqtt_cfg.username  = mqtt_username;
-  mqtt_cfg.password  = mqtt_password;
-  mqtt_cfg.client_id = mqtt_client_id;
+  mqtt_cfg.username  = MQTT_USERNAME;
+  mqtt_cfg.password  = MQTT_PASS;
+  mqtt_cfg.client_id = MQTT_CLIENT_ID;
 
   client_handle = esp_mqtt_client_init(&mqtt_cfg);
   esp_mqtt_client_register_event(client_handle, MQTT_EVENT_ANY, event_handler, nullptr);
@@ -25,15 +24,9 @@ esp_err_t MQTT::init(const char * username, const char * id, const char * passwo
   return ESP_OK;
 }
 
-void MQTT::set_credentials(const char * username, const char * id, const char * password)
+esp_err_t MQTT::publish(const char * topic, const char * data, int len, int qos, int retain) 
 {
-  strncpy(mqtt_username,  username, sizeof(mqtt_username));
-  strncpy(mqtt_client_id, id,       sizeof(mqtt_client_id));
-  strncpy(mqtt_password,  password, sizeof(mqtt_password));
-}
-
-void MQTT::publish(const char * topic, const char * data, int len, int qos, int retain) 
-{
+  esp_err_t status = ESP_FAIL;
   if ((state == State::CONNECTED) || (state == State::PUBLISHED)) {
     ESP_LOGI(TAG, "Sending [%s]: [%-*s] with qos:%d, retain:%d.", 
                   topic, 
@@ -41,8 +34,10 @@ void MQTT::publish(const char * topic, const char * data, int len, int qos, int 
                   data, 
                   qos, 
                   retain);
-    esp_mqtt_client_publish(client_handle, topic, data, len, qos, retain);
+    status = (esp_mqtt_client_publish(client_handle, topic, data, len, qos, retain) == -1) ? ESP_FAIL : ESP_OK;
   }
+
+  return status;
 }
 
 void MQTT::event_handler(void * args, esp_event_base_t base, int32_t event_id, void *event_data)

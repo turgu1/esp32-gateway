@@ -5,15 +5,18 @@
 #include "global.hpp"
 
 #include "app.hpp"
-#include "secret.hpp"
 
-Wifi          App::wifi;
-MQTT          App::mqtt;
-QueueHandle_t App::msg_queue = nullptr;
-xTaskHandle   App::task      = nullptr;
+Wifi             App::wifi;
+MQTT             App::mqtt;
+QueueHandle_t    App::msg_queue = nullptr;
+xTaskHandle      App::task      = nullptr;
 
 #ifdef UDP_GATEWAY
-  UDPReceiver   App::udp;
+  UDPReceiver    App::udp;
+#endif
+
+#ifdef ESP_NOW_GATEWAY
+  ESPNowReceiver App::esp_now;
 #endif
 
 esp_err_t App::init() 
@@ -31,13 +34,13 @@ esp_err_t App::init()
 
   // Wifi initialization
 
-  status = wifi.init(WIFI_SSID, WIFI_PASS);
+  status = wifi.init();
   ESP_ERROR_CHECK(status);
   wifi.show_state();
 
   Wifi::State state = wifi.get_state();
   while (!((state == Wifi::State::CONNECTED) || (state == Wifi::State::ERROR))) {
-    vTaskDelay(pdMS_TO_TICKS(100));
+    vTaskDelay(pdMS_TO_TICKS(1000));
     state = wifi.get_state();
   }
 
@@ -45,7 +48,7 @@ esp_err_t App::init()
 
   // MQTT initialization
 
-  status = mqtt.init(MQTT_USERNAME, MQTT_CLIENT_ID, MQTT_PASS);
+  status = mqtt.init();
   ESP_ERROR_CHECK(status);
   mqtt.show_state();
 
@@ -61,6 +64,13 @@ esp_err_t App::init()
     // UDPReceiver initialization
 
     status = udp.init(msg_queue);
+    ESP_ERROR_CHECK(status);
+  #endif
+
+  #ifdef ESP_NOW_GATEWAY
+    // UDPReceiver initialization
+
+    status = esp_now.init(msg_queue);
     ESP_ERROR_CHECK(status);
   #endif
 
@@ -105,7 +115,9 @@ void App::main_task(void * params)
             strcpy(topic, TOPIC_PREFIX);
             strcat(topic, topic_suffix);
 
-            mqtt.publish(topic, data, len, 0, 0);
+            while (mqtt.publish(topic, data, len, DEFAULT_QOS, DEFAULT_RETAIN) == ESP_FAIL) {
+              vTaskDelay(pdMS_TO_TICKS(1000));
+            }
 
             free(msg.data);
             free(topic);

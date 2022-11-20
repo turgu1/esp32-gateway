@@ -5,6 +5,8 @@
 #include <esp_wifi.h>
 #include <esp_event.h>
 
+#include "config.hpp"
+
 class Wifi
 {
   public:
@@ -35,24 +37,27 @@ class Wifi
     static esp_err_t  connect(void);
     esp_err_t    retrieve_mac(void);
 
-    wifi_init_config_t wifi_init_cfg;
-    wifi_config_t      wifi_cfg;
     uint8_t            mac_addr[6];
     char               mac_addr_cstr[18];
 
+    wifi_init_config_t wifi_init_cfg;
+    wifi_config_t      wifi_sta_cfg;
+    #ifdef ESP_NOW_GATEWAY
+      wifi_config_t    wifi_ap_cfg;
+    #endif
 
   public:
     Wifi(void);
 
-    esp_err_t init(const char * ssid, const char * password);
+    esp_err_t              init();
 
-    const State    &    get_state(void) { return state; }
-    const char     * get_mac_cstr(void) { return mac_addr_cstr; }
-    uint32_t               get_ip(void) { return ip; }
-    const char     *  get_ip_cstr(void) { return ip_cstr; }
-    int8_t               get_rssi(void) { return rssi; }
+    const State  &    get_state(void) { return state; }
+    const char   * get_mac_cstr(void) { return mac_addr_cstr; }
+    uint32_t             get_ip(void) { return ip; }
+    const char   *  get_ip_cstr(void) { return ip_cstr; }
+    int8_t             get_rssi(void) { return rssi; }
     
-    void   prepare_for_deep_sleep();
+    void prepare_for_deep_sleep();
 
-    static void        show_state();
+    static void      show_state();
 }; // Wifi class
