@@ -1,4 +1,4 @@
-## ESP32-Gateway - ESP32 based ESP-NOW/UDP -> MQTT gateway
+### ESP32-Gateway - ESP32 based ESP-NOW/UDP -> MQTT gateway
 
 Work in progress... nothing works for now
 
