@@ -4,6 +4,7 @@
 #include <esp_log.h>
 
 #include "global.hpp"
+#include "utils.hpp"
 #include "udp_receiver.hpp"
 
 xTaskHandle   UDPReceiver::task      = nullptr;
@@ -12,8 +13,10 @@ bool          UDPReceiver::abort     = false;
 
 esp_err_t UDPReceiver::init(QueueHandle_t queue)
 {
-  abort = false;
+  abort     = false;
   msg_queue = queue;
+
+  esp_log_level_set(TAG, LOG_LEVEL);
 
   if (xTaskCreate(receive_server, "udp_server", 4096, (void*)AF_INET, 5, &task) != pdPASS) {
     ESP_LOGE(TAG, "Unable to create receive server task.");
@@ -24,7 +27,7 @@ esp_err_t UDPReceiver::init(QueueHandle_t queue)
 
 void UDPReceiver::receive_server(void * params) 
 {
-  static char rx_buffer[MAX_MSG_SIZE];
+  static uint8_t rx_buffer[UDP_MAX_PKT_SIZE];
   static char  addr_str[128];
   int addr_family = AF_INET;
   int ip_protocol = 0;
@@ -43,7 +46,7 @@ void UDPReceiver::receive_server(void * params)
         ESP_LOGE(TAG, "Unable to create socket: errno %d", errno);
         break;
     }
-    ESP_LOGI(TAG, "Socket created");
+    ESP_LOGD(TAG, "Socket created");
 
     // Set timeout
     // struct timeval timeout;
@@ -56,13 +59,13 @@ void UDPReceiver::receive_server(void * params)
       ESP_LOGE(TAG, "Socket unable to bind: errno %d", errno);
       break;
     }
-    ESP_LOGI(TAG, "Socket bound, port %d", UDP_IN_PORT);
+    ESP_LOGD(TAG, "Socket bound, port %d", UDP_IN_PORT);
 
     struct sockaddr_storage source_addr; // Large enough for both IPv4 or IPv6
     socklen_t socklen = sizeof(source_addr);
 
     while (!abort) {
-      ESP_LOGI(TAG, "Waiting for data");
+      ESP_LOGD(TAG, "Waiting for data");
       int len = recvfrom(sock, rx_buffer, sizeof(rx_buffer) - 1, 0, (struct sockaddr *)&source_addr, &socklen);
 
       if (abort) break;
@@ -77,20 +80,21 @@ void UDPReceiver::receive_server(void * params)
         // Get the sender's ip address as string
         inet_ntoa_r(((struct sockaddr_in *)&source_addr)->sin_addr, addr_str, sizeof(addr_str) - 1);
 
-        rx_buffer[len] = 0; // Null-terminate whatever we received and treat like a string...
-        ESP_LOGI(TAG, "Received %d bytes from %s:", len, addr_str);
-        ESP_LOGI(TAG, "%s", rx_buffer);
-
+        ESP_LOGD(TAG, "Received %d bytes from %s:", len, addr_str);
+        dump_data(TAG, rx_buffer, len);
+ 
         Message msg;
 
-        msg.data = (char *) malloc(len + 1);
+        msg.data = (uint8_t *) malloc(len);
         if (msg.data == nullptr) {
           ESP_LOGE(TAG, "Unable to allocation memory for message data.");
         }
         else if (msg_queue != nullptr) {
-          memcpy(msg.data, rx_buffer, len + 1);
-          msg.length = len + 1;
-          xQueueSend(msg_queue, &msg, 0);
+          memcpy(msg.data, rx_buffer, len);
+          msg.length = len;
+          if (xQueueSend(msg_queue, &msg, 0) != pdTRUE) {
+            ESP_LOGW(TAG, "Message Queue is full, message is lost.");
+          }
         }
       }
     }

@@ -2,9 +2,16 @@
 
 Work in progress... nothing works for now
 
-This is a simple gateway that allow the transmission of ESP-NOW or UDP pacquets received from other ESP32/ESP8266 to a MQTT server. The intent is to optimize the battery powered ESP32/ESP8266 sensing devices using ESP-NOW and c/c++ coding instead of Tasmota or ESPHome solutions. Accessing the sensors information from products like OpenHab and HomeAssistant will be then possible through a MQTT server.
+This is a simple gateway that allow the transmission of ESP-NOW or UDP pacquets received from other ESP32/ESP8266 to a MQTT server. The intent is to optimize the battery powered ESP32/ESP8266 sensing devices using ESP-NOW and C/C++ coding instead of Tasmota or ESPHome solutions. Accessing the sensors information from products like OpenHab and HomeAssistant will be then possible through a MQTT server.
 
-The gateway can be configured to accept ESP-NOW or UDP sensors packets through configuration paramters. The gateway is expected to be powered through AC adaptor and be always ON.
+Here are the principal characteristics:
+
+- UDP and ESP-NOW sender support: UDP can be used for any kind of sensors that can send UDP packets on the local network. ESP-NOW can be used with Espressif supported devices (ESP32 and ESP8266 families)
+- Packet size limit of 250 bytes for ESP-NOW and configurable for UDP.
+- Verbose output for debugging and monitoring through standard ESP32 development board USB port.
+- ESP-IDF based. PlatformIO is used to manage the gateway build process.
+
+The gateway is expected to be powered through AC adaptor and be always ON.
 
 The received packet from ESP-NOW/UDP sensors are expected to have a topic name suffix at the beginning of the pacquet, followed by a semicolon, followed by the data to be send to the MQTT server. The topic name suffix is used by the gateway to generate a topic name of the form `<topic name prefix>/<topic name suffix>`. For exemple, if the topinc name prefix is `iot/` and the topic name suffix is `home_temp` the MQTT topic will be `iot/home_temp`. The topic name prefix is adjustable in the `config.hpp` file.
 

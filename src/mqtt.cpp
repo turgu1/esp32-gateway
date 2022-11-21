@@ -3,6 +3,7 @@
 #include "mqtt.hpp"
 #include "config.hpp"
 #include "secret.hpp"
+#include "utils.hpp"
 
 // Class variables
 
@@ -11,6 +12,8 @@ MQTT::State        MQTT::state           = State::NOT_INITIALIZED;
 
 esp_err_t MQTT::init()
 {
+  esp_log_level_set(TAG, LOG_LEVEL);
+
   mqtt_cfg.uri       = MQTT_SERVER_URI;
   mqtt_cfg.username  = MQTT_USERNAME;
   mqtt_cfg.password  = MQTT_PASS;
@@ -24,17 +27,17 @@ esp_err_t MQTT::init()
   return ESP_OK;
 }
 
-esp_err_t MQTT::publish(const char * topic, const char * data, int len, int qos, int retain) 
+esp_err_t MQTT::publish(const char * topic, const uint8_t * data, int len, int qos, int retain) 
 {
   esp_err_t status = ESP_FAIL;
   if ((state == State::CONNECTED) || (state == State::PUBLISHED)) {
-    ESP_LOGI(TAG, "Sending [%s]: [%-*s] with qos:%d, retain:%d.", 
+    ESP_LOGD(TAG, "Sending msg of length %d to [%s] with qos:%d, retain:%d:", 
+                  len,
                   topic, 
-                  (data[len-1] == 0) ? len - 1 : len, 
-                  data, 
                   qos, 
                   retain);
-    status = (esp_mqtt_client_publish(client_handle, topic, data, len, qos, retain) == -1) ? ESP_FAIL : ESP_OK;
+    dump_data(TAG, data, len);
+    status = (esp_mqtt_client_publish(client_handle, topic, (const char *) data, len, qos, retain) == -1) ? ESP_FAIL : ESP_OK;
   }
 
   return status;
@@ -92,7 +95,7 @@ void MQTT::event_handler(void * args, esp_event_base_t base, int32_t event_id, v
 
 void MQTT::prepare_for_deep_sleep()
 {
-
+  esp_mqtt_client_stop(client_handle);
 }
 
 void MQTT::show_state()
@@ -124,5 +127,5 @@ void MQTT::show_state()
       msg = "UNKNOWN!!!";
   }  
 
-  ESP_LOGI(TAG, "State: %s", msg);
+  ESP_LOGD(TAG, "State: %s", msg);
 }

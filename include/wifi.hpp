@@ -42,22 +42,23 @@ class Wifi
 
     wifi_init_config_t wifi_init_cfg;
     wifi_config_t      wifi_sta_cfg;
-    #ifdef ESP_NOW_GATEWAY
+    #ifdef WIFI_AP_ENABLE
       wifi_config_t    wifi_ap_cfg;
     #endif
 
   public:
     Wifi(void);
 
-    esp_err_t              init();
+    esp_err_t                     init();
 
-    const State  &    get_state(void) { return state; }
-    const char   * get_mac_cstr(void) { return mac_addr_cstr; }
-    uint32_t             get_ip(void) { return ip; }
-    const char   *  get_ip_cstr(void) { return ip_cstr; }
-    int8_t             get_rssi(void) { return rssi; }
+    inline const State  &    get_state(void) { return state; }
+    inline const uint8_t *     get_mac(void) { return mac_addr; }
+    inline const char   * get_mac_cstr(void) { return mac_addr_cstr; }
+    inline uint32_t             get_ip(void) { return ip; }
+    inline const char   *  get_ip_cstr(void) { return ip_cstr; }
+    inline int8_t             get_rssi(void) { return rssi; }
     
-    void prepare_for_deep_sleep();
+    void        prepare_for_deep_sleep();
 
     static void      show_state();
 }; // Wifi class

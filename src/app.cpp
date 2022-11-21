@@ -21,6 +21,8 @@ xTaskHandle      App::task      = nullptr;
 
 esp_err_t App::init() 
 {
+  esp_log_level_set(TAG, LOG_LEVEL);
+
   // Initialize NVS
   esp_err_t status = nvs_flash_init();
   if (status == ESP_ERR_NVS_NO_FREE_PAGES || status == ESP_ERR_NVS_NEW_VERSION_FOUND) {
@@ -88,34 +90,34 @@ void App::main_task(void * params)
 
     Message msg;
     if (xQueueReceive(msg_queue, &msg, pdMS_TO_TICKS(1000))) {
-
-      int    len         = msg.length;
-      char * data        = msg.data;
-      char * topic_suffix = nullptr;
+ 
+      int       len          = msg.length;
+      uint8_t * data         = msg.data;
+      char    * topic_suffix = nullptr;
 
       while ((len > 0) && (*data == ' ')) { data++; len--; }
-      topic_suffix = data;
+      topic_suffix = (char *) data;
       while ((len > 0) && (*data != ';')) { data++; len--; }
 
-      if (len == 0) {
-        ESP_LOGE(TAG, "Paquet format error. TopicSuffix or ';' not found.");
+      if (len <= 0) {
+        ESP_LOGE(TAG, "Paquet format error. Topic suffix or ';' not found.");
       }
       else {
         *data++ = 0; len--;
 
-        if (len == 0) {
+        if (len <= 0) {
           ESP_LOGE(TAG, "Paquet format error. Empty packet.");
         }
         else {
-          char * topic = (char *) malloc(strlen(topic_suffix) + strlen(TOPIC_PREFIX) + 1);
+          char * topic = (char *) malloc(strlen(topic_suffix) + strlen(MQTT_TOPIC_PREFIX) + 1);
           if (topic == nullptr) {
             ESP_LOGE(TAG, "Unable to allocate memory for topic name.");
           }
           else {
-            strcpy(topic, TOPIC_PREFIX);
+            strcpy(topic, MQTT_TOPIC_PREFIX);
             strcat(topic, topic_suffix);
 
-            while (mqtt.publish(topic, data, len, DEFAULT_QOS, DEFAULT_RETAIN) == ESP_FAIL) {
+            while (mqtt.publish(topic, data, len, MQTT_DEFAULT_QOS, MQTT_DEFAULT_RETAIN) == ESP_FAIL) {
               vTaskDelay(pdMS_TO_TICKS(1000));
             }
 

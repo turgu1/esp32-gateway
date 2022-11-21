@@ -31,7 +31,7 @@ class MQTT
 
   public:
     esp_err_t                init();
-    esp_err_t             publish(const char * topic, const char * data, int len, int qos, int retain);
+    esp_err_t             publish(const char * topic, const uint8_t * data, int len, int qos, int retain);
     const State &       get_state(void) { return state; }
     void   prepare_for_deep_sleep();
     static void        show_state();

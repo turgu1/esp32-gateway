@@ -13,7 +13,7 @@
   #include "udp_receiver.hpp"
 #endif
 
-#ifdef UDP_GATEWAY
+#ifdef ESP_NOW_GATEWAY
   #include "esp_now_receiver.hpp"
 #endif
 

@@ -17,11 +17,13 @@ char        Wifi::ip_cstr[20] = "0.0.0.0";
 
 Wifi::Wifi(void)
 {
+  esp_log_level_set(TAG, LOG_LEVEL);
+
   mac_addr_cstr[0] = 0;
   wifi_init_cfg    = WIFI_INIT_CONFIG_DEFAULT();
   memset(&wifi_sta_cfg, 0, sizeof(wifi_config_t));
 
-  #ifdef ESP_NOW_GATEWAY
+  #ifdef WIFI_AP_ENABLE
     memset(&wifi_ap_cfg, 0, sizeof(wifi_config_t));
   #endif
 }
@@ -81,7 +83,7 @@ void Wifi::ip_event_handler(void             * arg,
         esp_err_t status = esp_wifi_sta_get_ap_info(&ap);
         if (status == ESP_OK) {
           rssi = ap.rssi;
-          ESP_LOGI(TAG, "RSSI: %d.", rssi);
+          ESP_LOGD(TAG, "RSSI: %d.", rssi);
         }
         else {
           ESP_LOGE(TAG, "Unable to retrieve rssi: %s.", esp_err_to_name(status));
@@ -91,8 +93,8 @@ void Wifi::ip_event_handler(void             * arg,
         status = tcpip_adapter_get_ip_info(TCPIP_ADAPTER_IF_STA, &ipInfo);   
         if (status == ESP_OK) {
           ip = ipInfo.ip.addr;
-          snprintf(ip_cstr, 20, IPSTR, IP2STR(&ipInfo.ip));
-          ESP_LOGI(TAG, "IP Address: %s.", ip_cstr);
+          snprintf(ip_cstr, sizeof(ip_cstr), IPSTR, IP2STR(&ipInfo.ip));
+          ESP_LOGD(TAG, "IP Address: %s.", ip_cstr);
         } 
         else {
           ESP_LOGE(TAG, "Unable to retrieve IP Address: %s.", esp_err_to_name(status));
@@ -174,7 +176,7 @@ esp_err_t Wifi::init()
         status = ESP_FAIL;
       }
 
-      #ifdef ESP_NOW_GATEWAY
+      #ifdef WIFI_AP_ENABLE
         const esp_netif_t * const ap_netif = esp_netif_create_default_wifi_ap();
 
         if (ap_netif == nullptr) {
@@ -206,7 +208,7 @@ esp_err_t Wifi::init()
     }
 
     if (status == ESP_OK) {
-      #ifdef ESP_NOW_GATEWAY
+      #ifdef WIFI_AP_ENABLE
         if ((status = esp_wifi_set_mode(WIFI_MODE_APSTA)) != ESP_OK) {
           ESP_LOGE(TAG, "Unable to set wifi mode to APSTA: %s", esp_err_to_name(status));
         }
@@ -227,13 +229,13 @@ esp_err_t Wifi::init()
       if ((status = esp_wifi_set_config(WIFI_IF_STA, &wifi_sta_cfg)) != ESP_OK) {
         ESP_LOGE(TAG, "Unable to set STA config: %s", esp_err_to_name(status));
       }
-      #ifdef ESP_NOW_GATEWAY
+      #ifdef WIFI_AP_ENABLE
         else {
           memcpy(wifi_ap_cfg.ap.ssid,     WIFI_AP_SSID, std::min(strlen(WIFI_AP_SSID),     sizeof(wifi_ap_cfg.ap.ssid)));
           memcpy(wifi_ap_cfg.ap.password, WIFI_AP_PASS, std::min(strlen(WIFI_AP_PASS), sizeof(wifi_ap_cfg.ap.password)));
           wifi_ap_cfg.ap.authmode       = WIFI_AP_AUTH_MODE;
           wifi_ap_cfg.ap.ssid_len       = strlen(WIFI_AP_SSID);
-          wifi_ap_cfg.ap.max_connection = ESP_NOW_MAX_CONNECTIONS;
+          wifi_ap_cfg.ap.max_connection = 5;
           wifi_ap_cfg.ap.channel        = ESP_NOW_AP_CHANNEL;
 
           if (strlen(WIFI_AP_PASS) == 0) {
@@ -266,21 +268,20 @@ esp_err_t Wifi::init()
 
 void Wifi::set_credentials(const char *ssid, const char *password)
 {
+  esp_wifi_stop();
 }
 
 // Get default MAC from API and convert to ASCII HEX
 esp_err_t Wifi::retrieve_mac(void)
 {
-  const esp_err_t status = esp_read_mac(mac_addr, ESP_MAC_WIFI_SOFTAP);
+  #ifdef WIFI_AP_ENABLE
+    const esp_err_t status = esp_read_mac(mac_addr,  ESP_MAC_WIFI_SOFTAP);
+  #else
+    const esp_err_t status = esp_read_mac(mac_addr,  ESP_MAC_WIFI_STA);
+  #endif
 
   if (status == ESP_OK) {
-    snprintf(mac_addr_cstr, sizeof(mac_addr_cstr), "%02X:%02X:%02X:%02X:%02X:%02X",
-             mac_addr[0],
-             mac_addr[1],
-             mac_addr[2],
-             mac_addr[3],
-             mac_addr[4],
-             mac_addr[5]);
+    snprintf(mac_addr_cstr, sizeof(mac_addr_cstr), MACSTR, MAC2STR(mac_addr));
   }
 
   return status;
@@ -327,5 +328,5 @@ void Wifi::show_state()
       msg = "UNKNOWN!!!";
   }  
 
-  ESP_LOGI(TAG, "State: %s", msg);
+  ESP_LOGD(TAG, "State: %s", msg);
 }
