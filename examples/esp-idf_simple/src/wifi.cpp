@@ -208,13 +208,19 @@ esp_err_t Wifi::init()
     }
 
     if (status == ESP_OK) {
+      if ((status = esp_wifi_set_storage(WIFI_STORAGE_RAM)) != ESP_OK) {
+        ESP_LOGE(TAG, "Unable to set storage mode to RAM: %s", esp_err_to_name(status));
+      }
+    }
+
+    if (status == ESP_OK) {
       #ifdef WIFI_AP_ENABLE
         if ((status = esp_wifi_set_mode(WIFI_MODE_APSTA)) != ESP_OK) {
           ESP_LOGE(TAG, "Unable to set wifi mode to APSTA: %s", esp_err_to_name(status));
         }
       #else
-        if ((status = esp_wifi_set_mode(WIFI_MODE_STA)) != ESP_OK) {
-          ESP_LOGE(TAG, "Unable to set wifi mode to STA: %s", esp_err_to_name(status));
+        if ((status = esp_wifi_set_mode(WIFI_MODE)) != ESP_OK) {
+          ESP_LOGE(TAG, "Unable to set wifi mode: %s", esp_err_to_name(status));
         }        
       #endif
     }
@@ -254,6 +260,14 @@ esp_err_t Wifi::init()
         ESP_LOGE(TAG, "Unable to start wifi: %s.", esp_err_to_name(status));
       }
     }
+
+    #ifdef WIFI_CHANNEL
+      if (status == ESP_OK) {
+        if ((status = esp_wifi_set_channel(WIFI_CHANNEL, WIFI_SECOND_CHAN_NONE)) != ESP_OK) {
+          ESP_LOGE(TAG, "Unable to set channel: %s.", esp_err_to_name(status));
+        }
+      }
+    #endif
 
     if (status == ESP_OK) {
       state = State::INITIALIZED;

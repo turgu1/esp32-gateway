@@ -77,11 +77,11 @@ void App::main_task(void * params)
 
     if (toggle == 0) {
       // JSON packet being sent
-      msg = "test|{\"string1\":[23,{\"string2\":\"string3\"}]}";
+      msg = "toto|{\"string1\":[23,{\"string2\":\"string3\"}]}";
     }
     else {
       // JSON Lite packet being sent
-      msg = "test;{string1:[23,{string2:string3}]}";
+      msg = "toto;{string1:[23,{string2:string3}]}";
     }
 
     toggle ^= 1;

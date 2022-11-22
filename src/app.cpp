@@ -97,10 +97,10 @@ void App::main_task(void * params)
 
       while ((len > 0) && (*data == ' ')) { data++; len--; }
       topic_suffix = (char *) data;
-      while ((len > 0) && (*data != ';') && (*data != '|')) { data++; len--; }
+      while ((len > 0) && !((*data == ';') || (*data == '|'))) { data++; len--; }
 
       if (len <= 0) {
-        ESP_LOGE(TAG, "Paquet format error. Topic suffix or ';' not found.");
+        ESP_LOGE(TAG, "Paquet format error. Topic suffix or ';' or '|' not found.");
       }
       else {
         uint8_t * d;
@@ -112,7 +112,7 @@ void App::main_task(void * params)
             d = buff;
           }
           else {
-            d     = data + 1;
+            d     = data;
             d_len = len;
           }
         }
