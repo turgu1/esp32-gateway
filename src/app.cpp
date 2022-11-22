@@ -3,7 +3,7 @@
 
 #include "config.hpp"
 #include "global.hpp"
-
+#include "utils.hpp"
 #include "app.hpp"
 
 Wifi             App::wifi;
@@ -97,13 +97,30 @@ void App::main_task(void * params)
 
       while ((len > 0) && (*data == ' ')) { data++; len--; }
       topic_suffix = (char *) data;
-      while ((len > 0) && (*data != ';')) { data++; len--; }
+      while ((len > 0) && (*data != ';') && (*data != '|')) { data++; len--; }
 
       if (len <= 0) {
         ESP_LOGE(TAG, "Paquet format error. Topic suffix or ';' not found.");
       }
       else {
-        *data++ = 0; len--;
+        uint8_t * d;
+        int d_len;
+        static uint8_t buff[2048];
+        if (*data == ';') {
+          *data++ = 0; len--;
+          if ((d_len = to_json(data, len, (char *) buff, sizeof(buff))) > 0) {
+            d = buff;
+          }
+          else {
+            d     = data + 1;
+            d_len = len;
+          }
+        }
+        else {
+          *data++ = 0; len--;
+          d     = data;
+          d_len = len;
+        }
 
         if (len <= 0) {
           ESP_LOGE(TAG, "Paquet format error. Empty packet.");
@@ -117,7 +134,7 @@ void App::main_task(void * params)
             strcpy(topic, MQTT_TOPIC_PREFIX);
             strcat(topic, topic_suffix);
 
-            while (mqtt.publish(topic, data, len, MQTT_DEFAULT_QOS, MQTT_DEFAULT_RETAIN) == ESP_FAIL) {
+            while (mqtt.publish(topic, d, d_len, MQTT_DEFAULT_QOS, MQTT_DEFAULT_RETAIN) == ESP_FAIL) {
               vTaskDelay(pdMS_TO_TICKS(1000));
             }
 

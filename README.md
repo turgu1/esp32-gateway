@@ -9,11 +9,33 @@ Here are the principal characteristics:
 - UDP and ESP-NOW sender support: UDP can be used for any kind of sensors that can send UDP packets on the local network. ESP-NOW can be used with Espressif supported devices (ESP32 and ESP8266 families)
 - Packet size limit of 250 bytes for ESP-NOW and configurable for UDP.
 - Verbose output for debugging and monitoring through standard ESP32 development board USB port.
+- Allow for the use of a JSON Lite format in the sensor received packets: when possible, double-quotes can be omited and will be added before being sent to the MQTT server. This is to optimize the packet content coming from the sensor.
 - ESP-IDF based. PlatformIO is used to manage the gateway build process.
 
 The gateway is expected to be powered through AC adaptor and be always ON.
 
-The received packet from ESP-NOW/UDP sensors are expected to have a topic name suffix at the beginning of the pacquet, followed by a semicolon, followed by the data to be send to the MQTT server. The topic name suffix is used by the gateway to generate a topic name of the form `<topic name prefix>/<topic name suffix>`. For exemple, if the topinc name prefix is `iot/` and the topic name suffix is `home_temp` the MQTT topic will be `iot/home_temp`. The topic name prefix is adjustable in the `config.hpp` file.
+The received packet from ESP-NOW/UDP sensors are expected to have a topic name suffix at the beginning of the pacquet, followed by a separator, followed by the data to be send to the MQTT server:
+
+- The topic name suffix is used by the gateway to generate a topic name of the form `<topic name prefix>/<topic name suffix>`. For exemple, if the topinc name prefix is `iot/` and the topic name suffix is `home_temp` the MQTT topic will be `iot/home_temp`. The topic name prefix is adjustable in the `config.hpp` file.
+- The separator can be `;` for JSON Lite content, or `|` for plain content.
+
+### Plain content
+
+No specific processing is done on plain content: it is sent as-is to the MQTT broker.
+
+### JSON Lite content
+
+The JSON Lite processing add double-quotes on strings without them. It also eliminate irrelevant spaces that could be part of the packet. It keeps everything that present after the last `}`. If a string contains any of the following characters, it is required that the input string in the received packet stay with double-quotes:
+
+```spaces : , ] }```
+
+The following characters are processed as spaces:
+
+```space horizontal-tab vertical-tab new-line carriage-return form-feed```
+
+The JSON Lite procesing doesn't expect unicode characters. Augmented ASCII (8 bits characters) is OK.
+
+### Configuration
 
 The following files must be adjusted to reflect your environment:
 

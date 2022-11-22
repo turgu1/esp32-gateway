@@ -17,10 +17,10 @@
 #ifdef UDP_GATEWAY
   // All UDP devices must use the following port number to transmit packets
   // to the gateway
-  constexpr const in_port_t UDP_IN_PORT = 3333;
+  constexpr const in_port_t UDP_IN_PORT      = 3333;
   
   // The maximum size of packets transmitted by UDP sensors. ESP-NOW limit is 250 bytes.
-  constexpr const int    UDP_MAX_PKT_SIZE     = 250;
+  constexpr const int       UDP_MAX_PKT_SIZE = 250;
 #endif
 
 #ifdef ESP_NOW_GATEWAY
@@ -37,13 +37,12 @@ constexpr const int    MQTT_DEFAULT_QOS     = 0;
 constexpr const int    MQTT_DEFAULT_RETAIN  = 0;
 
 // The maximum number of packets in the queue waiting for transmission through MQTT
-constexpr const int    MSG_QUEUE_SIZE       =  20;
+constexpr const int    MSG_QUEUE_SIZE       = 20;
 
 // Define the log level for all classes
 // One of (ESP_LOG_<suffix>: NONE, ERROR, WARN, INFO, DEBUG, VERBOSE
 //
 // To take effect the CONFIG_LOG_MAXIMUM_LEVEL configuration parameter must
 // be as high as the targeted log level. This is set in menuconfig
-// Component config > Log output > Maximum log verbosity
+//     Component config > Log output > Maximum log verbosity
 constexpr const esp_log_level_t LOG_LEVEL = ESP_LOG_DEBUG;
-
