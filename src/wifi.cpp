@@ -162,107 +162,64 @@ esp_err_t Wifi::init()
   if (mac_addr_cstr[0] == 0) {
     if ((status = retrieve_mac()) != ESP_OK) {
       ESP_LOGE(TAG, "Unable to retrieve Mac Adress: %s", esp_err_to_name(status));
-      return ESP_FAIL;
+      status = ESP_FAIL;
     }
   }
 
-  if (state == State::NOT_INITIALIZED) {
-    status = esp_netif_init();
-    if (status == ESP_OK) {
-      const esp_netif_t * const sta_netif = esp_netif_create_default_wifi_sta();
-
-      if (sta_netif == nullptr) {
-        ESP_LOGE(TAG, "Unable to create default wifi STA.");
-        status = ESP_FAIL;
-      }
-
-      #ifdef WIFI_AP_ENABLE
-        const esp_netif_t * const ap_netif = esp_netif_create_default_wifi_ap();
-
-        if (ap_netif == nullptr) {
-          ESP_LOGE(TAG, "Unable to create default wifi AP.");
-          status = ESP_FAIL;
-        }
-
-      #endif
-    }
-
-    if (status == ESP_OK) {
-      if ((status = esp_wifi_init(&wifi_init_cfg)) != ESP_OK) {
-        ESP_LOGE(TAG, "Unable to initialize wifi: %s.", esp_err_to_name(status));
-      }
-    }
-
-    if (status == ESP_OK) {
-      status = esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_event_handler, nullptr, nullptr);
-      if (status != ESP_OK) {
-        ESP_LOGE(TAG, "Unable to register Wifi event hanfler instance: %s", esp_err_to_name(status));
-      }
-    }
-
-    if (status == ESP_OK) {
-      status = esp_event_handler_instance_register(IP_EVENT, ESP_EVENT_ANY_ID, &ip_event_handler, nullptr, nullptr);
-      if (status != ESP_OK) {
-        ESP_LOGE(TAG, "Unable to register IP event hanfler instance: %s", esp_err_to_name(status));
-      }
-    }
-
-    if (status == ESP_OK) {
-      #ifdef WIFI_AP_ENABLE
-        if ((status = esp_wifi_set_mode(WIFI_MODE_APSTA)) != ESP_OK) {
-          ESP_LOGE(TAG, "Unable to set wifi mode to APSTA: %s", esp_err_to_name(status));
-        }
-      #else
-        if ((status = esp_wifi_set_mode(WIFI_MODE_STA)) != ESP_OK) {
-          ESP_LOGE(TAG, "Unable to set wifi mode to STA: %s", esp_err_to_name(status));
-        }        
-      #endif
-    }
-
-    if (status == ESP_OK) {
-      wifi_sta_cfg.sta.threshold.authmode = WIFI_STA_AUTH_MODE;
-      wifi_sta_cfg.sta.pmf_cfg.capable    = true;
-      wifi_sta_cfg.sta.pmf_cfg.required   = false;
-      memcpy(wifi_sta_cfg.sta.ssid,     WIFI_STA_SSID, std::min(strlen(WIFI_STA_SSID),     sizeof(wifi_sta_cfg.sta.ssid)));
-      memcpy(wifi_sta_cfg.sta.password, WIFI_STA_PASS, std::min(strlen(WIFI_STA_PASS), sizeof(wifi_sta_cfg.sta.password)));
-
-      if ((status = esp_wifi_set_config(WIFI_IF_STA, &wifi_sta_cfg)) != ESP_OK) {
-        ESP_LOGE(TAG, "Unable to set STA config: %s", esp_err_to_name(status));
-      }
-      #ifdef WIFI_AP_ENABLE
-        else {
-          memcpy(wifi_ap_cfg.ap.ssid,     WIFI_AP_SSID, std::min(strlen(WIFI_AP_SSID),     sizeof(wifi_ap_cfg.ap.ssid)));
-          memcpy(wifi_ap_cfg.ap.password, WIFI_AP_PASS, std::min(strlen(WIFI_AP_PASS), sizeof(wifi_ap_cfg.ap.password)));
-          wifi_ap_cfg.ap.authmode       = WIFI_AP_AUTH_MODE;
-          wifi_ap_cfg.ap.ssid_len       = strlen(WIFI_AP_SSID);
-          wifi_ap_cfg.ap.max_connection = 5;
-          wifi_ap_cfg.ap.channel        = ESP_NOW_AP_CHANNEL;
-
-          if (strlen(WIFI_AP_PASS) == 0) {
-            wifi_ap_cfg.ap.authmode = WIFI_AUTH_OPEN;
-          }
-
-          if ((status = esp_wifi_set_config(WIFI_IF_AP, &wifi_ap_cfg)) != ESP_OK) {
-            ESP_LOGE(TAG, "Unable to set AP config: %s", esp_err_to_name(status));
-          }
-        }
-      #endif
-    }
-
-    if (status == ESP_OK) {
-      if ((status = esp_wifi_start()) != ESP_OK) {
-        ESP_LOGE(TAG, "Unable to start wifi: %s.", esp_err_to_name(status));
-      }
-    }
-
-    if (status == ESP_OK) {
-      state = State::INITIALIZED;
-    }
-  }
-  else if (state == State::ERROR) {
-    state = State::NOT_INITIALIZED;
+  ESP_ERROR_CHECK(esp_netif_init());
+  if ((status == OK) && (esp_netif_create_default_wifi_sta() == nullptr)) {
+    ESP_LOGE(TAG, "Unable to create default wifi STA.");
+    status = ESP_FAIL;
   }
 
+  #ifdef WIFI_AP_ENABLE
+    if ((status == OK) && (esp_netif_create_default_wifi_ap() == nullptr)) {
+      ESP_LOGE(TAG, "Unable to create default wifi AP.");
+      status = ESP_FAIL;
+    }
+  #endif
+
+  if (status == ESP_OK) {
+    ESP_ERROR_CHECK(esp_wifi_init(&wifi_init_cfg));
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_event_handler, nullptr, nullptr));
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT, ESP_EVENT_ANY_ID, &ip_event_handler, nullptr, nullptr));
+    ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
+    
+    #ifdef WIFI_AP_ENABLE
+      ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA));
+    #else
+      ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
+    #endif
+
+    wifi_sta_cfg.sta.threshold.authmode = WIFI_STA_AUTH_MODE;
+    wifi_sta_cfg.sta.pmf_cfg.capable    = true;
+    wifi_sta_cfg.sta.pmf_cfg.required   = false;
+    memcpy(wifi_sta_cfg.sta.ssid,     WIFI_STA_SSID, std::min(strlen(WIFI_STA_SSID),     sizeof(wifi_sta_cfg.sta.ssid)));
+    memcpy(wifi_sta_cfg.sta.password, WIFI_STA_PASS, std::min(strlen(WIFI_STA_PASS), sizeof(wifi_sta_cfg.sta.password)));
+
+    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_sta_cfg));
+
+    #ifdef 0
+      memcpy(wifi_ap_cfg.ap.ssid,     WIFI_AP_SSID, std::min(strlen(WIFI_AP_SSID),     sizeof(wifi_ap_cfg.ap.ssid)));
+      memcpy(wifi_ap_cfg.ap.password, WIFI_AP_PASS, std::min(strlen(WIFI_AP_PASS), sizeof(wifi_ap_cfg.ap.password)));
+      wifi_ap_cfg.ap.authmode       = WIFI_AP_AUTH_MODE;
+      wifi_ap_cfg.ap.ssid_len       = strlen(WIFI_AP_SSID);
+      wifi_ap_cfg.ap.max_connection = 5;
+      wifi_ap_cfg.ap.channel        = WIFI_CHANNEL;
+
+      if (strlen(WIFI_AP_PASS) == 0) {
+        wifi_ap_cfg.ap.authmode = WIFI_AUTH_OPEN;
+      }
+
+      ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &wifi_ap_cfg));
+    #endif
+    
+    ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_NONE));
+    ESP_ERROR_CHECK(esp_wifi_start());
+
+    state = State::INITIALIZED;
+  }
+  
   return status;
 }
 

@@ -2,10 +2,8 @@
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
-#include <freertos/queue.h>
-#include <esp_err.h>
 
-#include "config.hpp"
+#include "global.hpp"
 #include "wifi.hpp"
 
 #ifdef UDP_SENDER
@@ -20,9 +18,12 @@ class App
 {
   private:
     static constexpr char const * TAG = "Main App";
+
+    static xTaskHandle task;
+    static void main_task(void * params);
     
-    static Wifi        wifi;
-    
+    Wifi wifi;
+
     #ifdef UDP_SENDER
       static UDPSender udp;
     #endif
@@ -31,10 +32,6 @@ class App
       static ESPNowSender esp_now;
     #endif
 
-    static xTaskHandle task;
-    static void main_task(void * params);
-
   public:
     esp_err_t init();
-
 };

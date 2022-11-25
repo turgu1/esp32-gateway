@@ -2,6 +2,7 @@
 #ifdef UDP_GATEWAY
 
 #include <esp_log.h>
+#include <esp_crc.h>
 
 #include "global.hpp"
 #include "utils.hpp"
@@ -85,15 +86,28 @@ void UDPReceiver::receive_server(void * params)
  
         Message msg;
 
-        msg.data = (uint8_t *) malloc(len);
-        if (msg.data == nullptr) {
-          ESP_LOGE(TAG, "Unable to allocation memory for message data.");
+        struct PKT {
+          uint16_t crc;
+          char data[0];
+        } __attribute__((packed)) * pkt;
+
+        pkt = (PKT *) rx_buffer;
+        int data_length = len - 2;
+
+        if (esp_crc16_le(UINT16_MAX, (const uint8_t *)(pkt->data), data_length) != pkt->crc) {
+          ESP_LOGE(TAG, "Received packet crc error.");
         }
-        else if (msg_queue != nullptr) {
-          memcpy(msg.data, rx_buffer, len);
-          msg.length = len;
-          if (xQueueSend(msg_queue, &msg, 0) != pdTRUE) {
-            ESP_LOGW(TAG, "Message Queue is full, message is lost.");
+        else {
+          msg.data = (uint8_t *) malloc(data_length);
+          if (msg.data == nullptr) {
+            ESP_LOGE(TAG, "Unable to allocation memory for message data.");
+          }
+          else if (msg_queue != nullptr) {
+            memcpy(msg.data, pkt->data, data_length);
+            msg.length = data_length;
+            if (xQueueSend(msg_queue, &msg, 0) != pdTRUE) {
+              ESP_LOGW(TAG, "Message Queue is full, message is lost.");
+            }
           }
         }
       }

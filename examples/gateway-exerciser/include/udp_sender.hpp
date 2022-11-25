@@ -1,10 +1,9 @@
 #pragma once
 
-#include "config.hpp"
+#include "global.hpp"
+
 #ifdef UDP_SENDER
 
-#include <cinttypes>
-#include <esp_check.h>
 #include <lwip/sockets.h>
 
 class UDPSender

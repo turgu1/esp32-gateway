@@ -3,5 +3,6 @@
 .vscode/c_cpp_properties.json
 .vscode/launch.json
 .vscode/ipch
+sdkconfig*
+include/global.hpp
 include/secret.hpp
-include/config.hpp
