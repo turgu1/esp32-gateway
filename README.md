@@ -18,7 +18,7 @@ Here are the principal characteristics:
 
 The gateway is expected to be powered through AC adaptor and be always ON.
 
-# Packet format
+### Packet format
 
 The received packet from ESP-NOW/UDP sensors are expected to have the following fields in the order shown:
 
@@ -53,13 +53,13 @@ Both files are absent from the retrieved project. Vanilla versions of the files 
 
 ### Channel usage
 
-ESP-NOW relies on the use of a single channel to transmit packets between devices. To allow the gateway to transmit packets to the MQTT server, it needs to connect to the Wifi network as a station mode device. As such, the Wifi router channel is used to communicate. As the ESP32 only have a single Wifi antenna, the same channel must be used for both Station connextion to the Wifi network and for ESP-NOW. It is then important to freeze the router channel (usually to one of 1, 6 or 11 to mitigate interference between channels) and configure all ESP-NOW devices to use that channel.
+ESP-NOW relies on the use of a single channel to transmit packets between devices. To allow the gateway to transmit packets to the MQTT server, it needs to connect to the Wifi network as a station mode device. As such, the Wifi router channel is used to communicate. As the ESP32 only have a single Wifi antenna, the same channel must be used for both Station connection to the Wifi network and for ESP-NOW. It is then important to freeze the router channel (usually to one of 1, 6 or 11 to mitigate interference between channels) and configure all ESP-NOW devices to use that channel.
 
 ----
 
 This project uses the ESP-IDF framework. Platformio is used to control the compilation process. 
 
-For now this is a one-way capability (sensors only). The following enhancement will come after the basic functionality be completed:
+For now this is a one-way capability (sensors only). The following enhancements will come after the basic functionality be completed:
 
 1) Optional Encryption for MQTT
 2) Optional Encryption for ESP-NOW or UDP
