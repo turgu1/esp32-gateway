@@ -15,7 +15,7 @@ esp_err_t ESPNowSender::init(const uint8_t * remote_ap_mac_addr)
 {
   esp_err_t status;
 
-  esp_log_level_set(TAG, LOG_LEVEL);
+  esp_log_level_set(TAG, CONFIG_GATEWAY_LOG_LEVEL);
 
   memcpy(ap_mac_addr, remote_ap_mac_addr, sizeof(ap_mac_addr));
 
@@ -23,7 +23,7 @@ esp_err_t ESPNowSender::init(const uint8_t * remote_ap_mac_addr)
 
   // ESP_ERROR_CHECK(esp_now_register_recv_cb(send_handler));
  
-  ESP_ERROR_CHECK(status = esp_now_set_pmk((const uint8_t *) ESP_NOW_PMK));
+  ESP_ERROR_CHECK(status = esp_now_set_pmk((const uint8_t *) CONFIG_GATEWAY_ESPNOW_PMK));
 
   esp_now_peer_info_t * peer = (esp_now_peer_info_t *) malloc(sizeof(esp_now_peer_info_t));
   if (peer == NULL) {
@@ -37,7 +37,7 @@ esp_err_t ESPNowSender::init(const uint8_t * remote_ap_mac_addr)
   memcpy(peer->peer_addr, ap_mac_addr, 6);
   memcpy(peer->lmk, ESP_NOW_LMK, ESP_NOW_KEY_LEN);
 
-  peer->channel   = WIFI_CHANNEL;
+  peer->channel   = CONFIG_GATEWAY_CHANNEL;
   peer->ifidx     = (wifi_interface_t) ESP_IF_WIFI_STA;
   peer->encrypt   = false;
 
@@ -49,7 +49,7 @@ esp_err_t ESPNowSender::init(const uint8_t * remote_ap_mac_addr)
   
   free(peer);
 
-  ESP_ERROR_CHECK(esp_wifi_set_channel(WIFI_CHANNEL, WIFI_SECOND_CHAN_NONE));
+  ESP_ERROR_CHECK(esp_wifi_set_channel(CONFIG_GATEWAY_CHANNEL, WIFI_SECOND_CHAN_NONE));
 
   ESP_LOGD(TAG, "End of ESPNowSender.init().");
 

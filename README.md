@@ -1,6 +1,6 @@
 ### ESP32-Gateway - ESP32 based ESP-NOW/UDP -> MQTT gateway
 
-2022-11-25 - Version 0.1
+2022-11-25 - Version 0.2
 
 This project is working. This is still under heavy modification.
 
@@ -46,17 +46,20 @@ The JSON Lite process doesn't expect UTF-8 (Unicode) characters. Augmented ASCII
 
 ### Configuration
 
-The following files must be adjusted to reflect your environment:
+The ESP32 Gateway configuration is done through the menuconfig capability associated with ESP-IDF. The following PlatformIO's menu option can be used to access the menuconfig application: `Run Menuconfig`.
 
-- `include/config.hpp`
-- `include/secret.hpp`
-
-Both files are absent from the retrieved project. Vanilla versions of the files are supplied in the`include` folder: `config-dist.hpp` and `secret-dist.hpp`.
+All options for the Gateway will be found under the menuconfig entry named `ESP-32 Gateway Configuration`.
 
 ### Channel usage
 
 ESP-NOW relies on the use of a single channel to transmit packets between devices. To allow the gateway to transmit packets to the MQTT server, it needs to connect to the Wifi network as a station-mode device. As such, the Wifi router channel is used to communicate. As the ESP32 only has a single Wifi antenna, the same channel must be used for both Station connection to the Wifi network and ESP-NOW. It is then important to freeze the router channel (usually to one of 1, 6, or 11 to mitigate interference between channels) and configure all ESP-NOW devices to use that channel.
 
+### ESP-NOW Encrypted devices
+
+Pre-defined peer encrypted devices can be identified in the `src/config.cpp` file. A list of keys (6 maximum) and the list of mac addresses/key pointers are used to identify the peers to be added at boot time. The table actual sizes are located in `include/config.hpp` and can be adjusted if needed (mainly the LMK_KEY_COUNT, and ENCRYPTED_DEVICES_COUNT constants). 
+
+This is to simplify the interaction between the gateway and the sensors that require encryption. Note that the number of encrypted devices is limited to 6. No specific protocol is then required, the sensors can immediatly send encrypted packets, optimizing power usage. 
+ 
 ----
 
 This project uses the ESP-IDF framework. Platformio is used to control the compilation process. 

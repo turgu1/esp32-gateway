@@ -11,17 +11,17 @@ MQTT             App::mqtt;
 QueueHandle_t    App::msg_queue = nullptr;
 xTaskHandle      App::task      = nullptr;
 
-#ifdef UDP_GATEWAY
+#ifdef CONFIG_GATEWAY_ENABLE_UDP
   UDPReceiver    App::udp;
 #endif
 
-#ifdef ESP_NOW_GATEWAY
+#ifdef CONFIG_GATEWAY_ENABLE_ESP_NOW
   ESPNowReceiver App::esp_now;
 #endif
 
 esp_err_t App::init() 
 {
-  esp_log_level_set(TAG, LOG_LEVEL);
+  esp_log_level_set(TAG, CONFIG_GATEWAY_LOG_LEVEL);
 
   // Initialize NVS
   esp_err_t status = nvs_flash_init();
@@ -56,21 +56,21 @@ esp_err_t App::init()
 
   // Messages Queue initialization
 
-  msg_queue = xQueueCreate(MSG_QUEUE_SIZE, sizeof(Message));
+  msg_queue = xQueueCreate(CONFIG_GATEWAY_MSG_QUEUE_SIZE, sizeof(Message));
   if (msg_queue == nullptr) {
     ESP_LOGE(TAG, "Unable to create Message Queue.");
     return ESP_FAIL;
   }
 
-  #ifdef UDP_GATEWAY
+  #ifdef CONFIG_GATEWAY_ENABLE_UDP
     // UDPReceiver initialization
 
     status = udp.init(msg_queue);
     ESP_ERROR_CHECK(status);
   #endif
 
-  #ifdef ESP_NOW_GATEWAY
-    // UDPReceiver initialization
+  #ifdef CONFIG_GATEWAY_ENABLE_ESP_NOW
+    // EspNowReceiver initialization
 
     status = esp_now.init(msg_queue);
     ESP_ERROR_CHECK(status);
@@ -126,15 +126,15 @@ void App::main_task(void * params)
           ESP_LOGE(TAG, "Paquet format error. Empty packet.");
         }
         else {
-          char * topic = (char *) malloc(strlen(topic_suffix) + strlen(MQTT_TOPIC_PREFIX) + 1);
+          char * topic = (char *) malloc(strlen(topic_suffix) + strlen(CONFIG_GATEWAY_MQTT_TOPIC_PREFIX) + 1);
           if (topic == nullptr) {
             ESP_LOGE(TAG, "Unable to allocate memory for topic name.");
           }
           else {
-            strcpy(topic, MQTT_TOPIC_PREFIX);
+            strcpy(topic, CONFIG_GATEWAY_MQTT_TOPIC_PREFIX);
             strcat(topic, topic_suffix);
 
-            while (mqtt.publish(topic, d, d_len, MQTT_DEFAULT_QOS, MQTT_DEFAULT_RETAIN) == ESP_FAIL) {
+            while (mqtt.publish(topic, d, d_len, CONFIG_GATEWAY_MQTT_DEFAULT_QOS, CONFIG_GATEWAY_MQTT_DEFAULT_RETAIN) == ESP_FAIL) {
               vTaskDelay(pdMS_TO_TICKS(1000));
             }
 

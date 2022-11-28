@@ -9,11 +9,11 @@
 #include "wifi.hpp"
 #include "mqtt.hpp"
 
-#ifdef UDP_GATEWAY
+#ifdef CONFIG_GATEWAY_ENABLE_UDP
   #include "udp_receiver.hpp"
 #endif
 
-#ifdef ESP_NOW_GATEWAY
+#ifdef CONFIG_GATEWAY_ENABLE_ESP_NOW
   #include "esp_now_receiver.hpp"
 #endif
 
@@ -25,11 +25,11 @@ class App
     static Wifi        wifi;
     static MQTT        mqtt;
     
-    #ifdef UDP_GATEWAY
+    #ifdef CONFIG_GATEWAY_ENABLE_UDP
       static UDPReceiver udp;
     #endif
 
-    #ifdef ESP_NOW_GATEWAY
+    #ifdef CONFIG_GATEWAY_ENABLE_ESP_NOW
       static ESPNowReceiver esp_now;
     #endif
 

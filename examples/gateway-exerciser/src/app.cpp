@@ -16,7 +16,7 @@ esp_err_t App::init()
 {
   esp_err_t status = ESP_OK;
 
-  esp_log_level_set(TAG, LOG_LEVEL);
+  esp_log_level_set(TAG, CONFIG_GATEWAY_LOG_LEVEL);
 
   // Initialize NVS
   status = nvs_flash_init();

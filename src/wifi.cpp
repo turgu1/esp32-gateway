@@ -2,7 +2,6 @@
 #include "esp_netif.h"
 
 #include "config.hpp"
-#include "secret.hpp"
 #include "wifi.hpp"
 
 // Class variables
@@ -17,7 +16,7 @@ char        Wifi::ip_cstr[20] = "0.0.0.0";
 
 Wifi::Wifi(void)
 {
-  esp_log_level_set(TAG, LOG_LEVEL);
+  esp_log_level_set(TAG, CONFIG_GATEWAY_LOG_LEVEL);
 
   mac_addr_cstr[0] = 0;
   wifi_init_cfg    = WIFI_INIT_CONFIG_DEFAULT();
@@ -194,18 +193,18 @@ esp_err_t Wifi::init()
     wifi_sta_cfg.sta.threshold.authmode = WIFI_STA_AUTH_MODE;
     wifi_sta_cfg.sta.pmf_cfg.capable    = true;
     wifi_sta_cfg.sta.pmf_cfg.required   = false;
-    memcpy(wifi_sta_cfg.sta.ssid,     WIFI_STA_SSID, std::min(strlen(WIFI_STA_SSID),     sizeof(wifi_sta_cfg.sta.ssid)));
-    memcpy(wifi_sta_cfg.sta.password, WIFI_STA_PASS, std::min(strlen(WIFI_STA_PASS), sizeof(wifi_sta_cfg.sta.password)));
+    memcpy(wifi_sta_cfg.sta.ssid,     CONFIG_GATEWAY_WIFI_STA_SSID, std::min(strlen(CONFIG_GATEWAY_WIFI_STA_SSID),     sizeof(wifi_sta_cfg.sta.ssid)));
+    memcpy(wifi_sta_cfg.sta.password, CONFIG_GATEWAY_WIFI_STA_PASS, std::min(strlen(CONFIG_GATEWAY_WIFI_STA_PASS), sizeof(wifi_sta_cfg.sta.password)));
 
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_sta_cfg));
 
-    #ifdef 0
+    #if 0
       memcpy(wifi_ap_cfg.ap.ssid,     WIFI_AP_SSID, std::min(strlen(WIFI_AP_SSID),     sizeof(wifi_ap_cfg.ap.ssid)));
       memcpy(wifi_ap_cfg.ap.password, WIFI_AP_PASS, std::min(strlen(WIFI_AP_PASS), sizeof(wifi_ap_cfg.ap.password)));
       wifi_ap_cfg.ap.authmode       = WIFI_AP_AUTH_MODE;
       wifi_ap_cfg.ap.ssid_len       = strlen(WIFI_AP_SSID);
       wifi_ap_cfg.ap.max_connection = 5;
-      wifi_ap_cfg.ap.channel        = WIFI_CHANNEL;
+      wifi_ap_cfg.ap.channel        = CONFIG_GATEWAY_CHANNEL;
 
       if (strlen(WIFI_AP_PASS) == 0) {
         wifi_ap_cfg.ap.authmode = WIFI_AUTH_OPEN;

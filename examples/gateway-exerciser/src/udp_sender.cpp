@@ -10,7 +10,7 @@
 
 esp_err_t UDPSender::init()
 {
-  esp_log_level_set(TAG, LOG_LEVEL);
+  esp_log_level_set(TAG, CONFIG_GATEWAY_LOG_LEVEL);
 
   esp_err_t status = ESP_OK;
 

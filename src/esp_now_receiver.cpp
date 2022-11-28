@@ -1,5 +1,5 @@
 #include "config.hpp"
-#ifdef ESP_NOW_GATEWAY
+#ifdef CONFIG_GATEWAY_ENABLE_ESP_NOW
 
 #include <cstring>
 #include <esp_crc.h>
@@ -13,17 +13,33 @@ bool          ESPNowReceiver::abort     = false;
 
 esp_err_t ESPNowReceiver::init(QueueHandle_t queue)
 {
-  esp_err_t status;
+  esp_err_t status = ESP_OK;
 
   msg_queue = queue;
 
-  esp_log_level_set(TAG, LOG_LEVEL);
+  esp_log_level_set(TAG, CONFIG_GATEWAY_LOG_LEVEL);
 
   ESP_ERROR_CHECK(esp_now_init());
-  ESP_ERROR_CHECK(status = esp_now_set_pmk((const uint8_t *) ESP_NOW_PMK));
+  ESP_ERROR_CHECK(status = esp_now_set_pmk((const uint8_t *) CONFIG_GATEWAY_ESPNOW_PMK));
   ESP_ERROR_CHECK(esp_now_register_recv_cb(receive_handler));
 
-  ESP_ERROR_CHECK(esp_wifi_set_channel(WIFI_CHANNEL, WIFI_SECOND_CHAN_NONE));
+  ESP_ERROR_CHECK(esp_wifi_set_channel(CONFIG_GATEWAY_CHANNEL, WIFI_SECOND_CHAN_NONE));
+
+  if (ENCRYPTED_DEVICES_COUNT > 0) {
+    ESP_LOGI(TAG, "----- Encrypted devices: -----");
+    for (int i = 0; i < ENCRYPTED_DEVICES_COUNT; i++) {
+      esp_now_peer_info_t peer;
+      memset(&peer, 0, sizeof(esp_now_peer_info_t));
+      memcpy(peer.peer_addr, &encrypted_devices[i].mac, sizeof(MacAddr));
+      memcpy(peer.lmk, encrypted_devices[i].key, ESP_NOW_KEY_LEN);
+      peer.channel = CONFIG_GATEWAY_CHANNEL;
+      peer.ifidx   = (wifi_interface_t) ESP_IF_WIFI_AP;
+      peer.encrypt = true;
+      ESP_ERROR_CHECK(esp_now_add_peer(&peer));
+      ESP_LOGI(TAG, "  MAC: " MACSTR ", LMK: %s", MAC2STR(encrypted_devices[i].mac), (char *) encrypted_devices[i].key);
+    }
+    ESP_LOGI(TAG, "----- End of list. -----");
+  }
 
   return status;
 }
@@ -45,20 +61,14 @@ void ESPNowReceiver::receive_handler(const uint8_t * mac_addr, const uint8_t * i
 
   // If MAC address does not exist in peer list, add it to the list.
   if (esp_now_is_peer_exist(mac_addr) == false) {
-    esp_now_peer_info_t * peer = (esp_now_peer_info_t *) malloc(sizeof(esp_now_peer_info_t));
-    if (peer == NULL) {
-      ESP_LOGE(TAG, "Malloc for peer information failed.");
-    }
-    else {
-      memset(peer, 0, sizeof(esp_now_peer_info_t));
-      peer->channel = WIFI_CHANNEL;
-      peer->ifidx   = (wifi_interface_t) ESP_IF_WIFI_AP;
-      peer->encrypt = false;
-      memcpy(peer->lmk, ESP_NOW_LMK, ESP_NOW_KEY_LEN);
-      memcpy(peer->peer_addr, mac_addr, ESP_NOW_ETH_ALEN);
-      ESP_ERROR_CHECK(esp_now_add_peer(peer));
-      free(peer);
-    }
+    esp_now_peer_info_t peer;
+    memset(&peer, 0, sizeof(esp_now_peer_info_t));
+    peer.channel = CONFIG_GATEWAY_CHANNEL;
+    peer.ifidx   = (wifi_interface_t) ESP_IF_WIFI_AP;
+    peer.encrypt = false;
+    //memcpy(peer.lmk, ESP_NOW_LMK, ESP_NOW_KEY_LEN);
+    memcpy(peer.peer_addr, mac_addr, ESP_NOW_ETH_ALEN);
+    ESP_ERROR_CHECK(esp_now_add_peer(&peer));
   }
 
   if (esp_crc16_le(UINT16_MAX, (const uint8_t *)(pkt->data), data_length) != pkt->crc) {

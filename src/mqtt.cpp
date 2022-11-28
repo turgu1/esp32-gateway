@@ -2,7 +2,6 @@
 
 #include "mqtt.hpp"
 #include "config.hpp"
-#include "secret.hpp"
 #include "utils.hpp"
 
 // Class variables
@@ -12,12 +11,12 @@ MQTT::State        MQTT::state           = State::NOT_INITIALIZED;
 
 esp_err_t MQTT::init()
 {
-  esp_log_level_set(TAG, LOG_LEVEL);
+  esp_log_level_set(TAG, CONFIG_GATEWAY_LOG_LEVEL);
 
-  mqtt_cfg.uri       = MQTT_SERVER_URI;
-  mqtt_cfg.username  = MQTT_USERNAME;
-  mqtt_cfg.password  = MQTT_PASS;
-  mqtt_cfg.client_id = MQTT_CLIENT_ID;
+  mqtt_cfg.uri       = CONFIG_GATEWAY_MQTT_SERVER_URI;
+  mqtt_cfg.username  = CONFIG_GATEWAY_MQTT_USERNAME;
+  mqtt_cfg.password  = CONFIG_GATEWAY_MQTT_PASS;
+  mqtt_cfg.client_id = CONFIG_GATEWAY_MQTT_CLIENT_ID;
 
   client_handle = esp_mqtt_client_init(&mqtt_cfg);
   esp_mqtt_client_register_event(client_handle, MQTT_EVENT_ANY, event_handler, nullptr);

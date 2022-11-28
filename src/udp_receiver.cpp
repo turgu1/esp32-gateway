@@ -1,5 +1,5 @@
 #include "config.hpp"
-#ifdef UDP_GATEWAY
+#ifdef CONFIG_GATEWAY_ENABLE_UDP
 
 #include <esp_log.h>
 #include <esp_crc.h>
@@ -17,7 +17,7 @@ esp_err_t UDPReceiver::init(QueueHandle_t queue)
   abort     = false;
   msg_queue = queue;
 
-  esp_log_level_set(TAG, LOG_LEVEL);
+  esp_log_level_set(TAG, CONFIG_GATEWAY_LOG_LEVEL);
 
   if (xTaskCreate(receive_server, "udp_server", 4096, (void*)AF_INET, 5, &task) != pdPASS) {
     ESP_LOGE(TAG, "Unable to create receive server task.");
@@ -28,7 +28,7 @@ esp_err_t UDPReceiver::init(QueueHandle_t queue)
 
 void UDPReceiver::receive_server(void * params) 
 {
-  static uint8_t rx_buffer[UDP_MAX_PKT_SIZE];
+  static uint8_t rx_buffer[CONFIG_GATEWAY_UDP_MAX_PKT_SIZE];
   static char  addr_str[128];
   int addr_family = AF_INET;
   int ip_protocol = 0;
@@ -39,7 +39,7 @@ void UDPReceiver::receive_server(void * params)
 
     dest_addr_ip4->sin_addr.s_addr = htonl(INADDR_ANY);
     dest_addr_ip4->sin_family      = AF_INET;
-    dest_addr_ip4->sin_port        = htons(UDP_IN_PORT);
+    dest_addr_ip4->sin_port        = htons(CONFIG_GATEWAY_UDP_PORT);
     ip_protocol                    = IPPROTO_IP;
 
     int sock = socket(addr_family, SOCK_DGRAM, ip_protocol);
@@ -60,7 +60,7 @@ void UDPReceiver::receive_server(void * params)
       ESP_LOGE(TAG, "Socket unable to bind: errno %d", errno);
       break;
     }
-    ESP_LOGD(TAG, "Socket bound, port %d", UDP_IN_PORT);
+    ESP_LOGD(TAG, "Socket bound, port %d", CONFIG_GATEWAY_UDP_PORT);
 
     struct sockaddr_storage source_addr; // Large enough for both IPv4 or IPv6
     socklen_t socklen = sizeof(source_addr);

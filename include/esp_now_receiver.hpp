@@ -1,7 +1,7 @@
 #pragma once
 
 #include "config.hpp"
-#ifdef ESP_NOW_GATEWAY
+#ifdef CONFIG_GATEWAY_ENABLE_ESP_NOW
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>

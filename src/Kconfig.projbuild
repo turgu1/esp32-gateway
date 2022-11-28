@@ -1,73 +1,203 @@
 menu "ESP-32 Gateway Configuration"
 
-    config UDP_GATEWAY
+    config GATEWAY_MSG_QUEUE_SIZE
+        int "Message queue size"
+        default 20
+        range 5 50
+        help
+            The maximum number of messages queud in the gateway waiting
+            to be sent to the MQTT server.
+
+    choice
+        prompt "Log Level"
+        default GATEWAY_LOG_ERROR
+        help
+            Max log level used by the gateway to report various log 
+            information on the USB port.
+        config GATEWAY_LOG_NONE
+            bool "None"
+        config GATEWAY_LOG_ERROR
+            bool "Error"
+        config GATEWAY_LOG_WARN
+            bool "Warning"
+        config GATEWAY_LOG_INFO
+            bool "Info"
+        config GATEWAY_LOG_DEBUG
+            bool "Debug"
+        config GATEWAY_LOG_VERBOSE
+            bool "Verbose"
+    endchoice
+    
+    config GATEWAY_ENABLE_UDP
         bool "Enable UDP packet reception"
         default "y"
         help
-            When enable, a task will wait for UDP packets for transmission to the MQTT broker.
+            When enable, a task will wait for UDP packets for transmission
+            to the MQTT broker.
 
-    config ESP_NOW_GATEWAY
-        bool "Enable ESPNOW packet reception"
+    config GATEWAY_ENABLE_ESP_NOW
+        bool "Enable ESP-NOW packet reception"
         default "y"
         help
-            When enable, a task will wait for ESP-NOW packets for transmission to the MQTT broker.
+            When enable, a task will wait for ESP-NOW packets for
+            transmission to the MQTT broker.
 
-    choice ESPNOW_WIFI_MODE
-        prompt "WiFi mode"
-        default ESPNOW_WIFI_MODE_STATION
-        help
-            WiFi mode(station or softap).
+    menu "UDP Protocol"
+        depends on GATEWAY_ENABLE_UDP
+        config GATEWAY_UDP_PORT
+            int "UDP Port"
+            default 3333
+            range 0 65535
+            help
+                The UDP Port to be used by devices to transmit packets to the
+                gateway.
 
-        config ESPNOW_WIFI_MODE_STATION
-            bool "Station"
-        config ESPNOW_WIFI_MODE_STATION_SOFTAP
-            bool "Softap"
-    endchoice
+        config GATEWAY_UDP_MAX_PKT_SIZE
+            int "UDP Max Packet Size"
+            default 250
+            range 2 1500
+            help
+                The UDP maximum packet size allowed. The first 2 bytes are
+                reseved for the CRC checksum.
+    endmenu
 
-    config ESPNOW_PMK
-        string "ESPNOW primary master key"
-        default "pmk1234567890123"
-        help
-            ESPNOW primary master for the example to use. The length of ESPNOW primary master must be 16 bytes.
+    menu "ESP-NOW Protocol"
+        depends on GATEWAY_ENABLE_ESP_NOW
+        config GATEWAY_ESPNOW_PMK
+            string "ESP-NOW primary master key"
+            default "pmk1234567890123"
+            help
+                ESP-NOW primary master key for the ESP-NOW devices and gateway
+                to use. The length of ESPNOW primary master must be 16 bytes.
+                Please ensure that all devices are using the same PMK.
 
-    config ESPNOW_LMK
-        string "ESPNOW local master key"
-        default "lmk1234567890123"
-        help
-            ESPNOW local master for the example to use. The length of ESPNOW local master must be 16 bytes.
+        config GATEWAY_CHANNEL
+            int "Channel"
+            default 1
+            range 0 14
+            help
+                The channel to be used by the gateway. Note that it must be
+                the same as defined in the WiFi router. Usual values are 1,
+                6, or 11. These values are to diminish potential interference.
 
-    config ESPNOW_CHANNEL
-        int "Channel"
-        default 1
-        range 0 14
-        help
-            The channel on which sending and receiving ESPNOW data.
+        config GATEWAY_ESPNOW_ENABLE_LONG_RANGE
+            bool "Enable Long Range"
+            default "n"
+            help
+                When enable long range, the PHY rate of ESP32 will be 512Kbps
+                or 256Kbps
+    endmenu
 
-    config ESPNOW_SEND_COUNT
-        int "Send count"
-        default 100
-        range 1 65535
-        help
-            Total count of unicast ESPNOW data to be sent.
+    menu "MQTT"
+        config GATEWAY_MQTT_SERVER_URI
+            string "MQTT Server URI"
+            default "mqtt://0.0.0.0:1883"
+            help
+                MQTT server URI.
 
-    config ESPNOW_SEND_DELAY
-        int "Send delay"
-        default 1000
-        range 0 65535
-        help
-            Delay between sending two ESPNOW data, unit: ms.
+        config GATEWAY_MQTT_TOPIC_PREFIX
+            string "MQTT Server topic prefix"
+            default "iot/"
+            help
+                Topic prefix to use to construct complete topic name, appending
+                device's topic suffix value.
 
-    config ESPNOW_SEND_LEN
-        int "Send len"
-        range 10 250
-        default 10
-        help
-            Length of ESPNOW data to be sent, unit: byte.
+        config GATEWAY_MQTT_DEFAULT_QOS
+            int "MQTT Default QOS value"
+            default 0
+            range 0 2
+            help
+                The MQTT QOS value to use when sending messages to the
+                MQTT server.
 
-    config ESPNOW_ENABLE_LONG_RANGE
-        bool "Enable Long Range"
-        default "n"
-        help
-            When enable long range, the PHY rate of ESP32 will be 512Kbps or 256Kbps
+        config GATEWAY_MQTT_DEFAULT_RETAIN
+            int "MQTT Default Retain value"
+            default 0
+            range 0 1
+            help
+                The MQTT Retain value to use when sending messages to the
+                MQTT server.
 
+        config GATEWAY_MQTT_USERNAME
+            string "MQTT Username"
+            default "your_mqtt_username"
+            help
+                Username as defined in the MQTT server configuration.
+
+
+        config GATEWAY_MQTT_CLIENT_ID
+            string "MQTT Client Identification"
+            default "your_mqtt_client_id"
+            help
+                MQTT Client Id used by the gateway.
+
+
+        config GATEWAY_MQTT_PASS
+            string "MQTT User Password"
+            default "your_mqtt_password"
+            help
+                Password associated to username as defined in the MQTT server configuration.
+    endmenu
+    
+    menu "Wifi"
+        config GATEWAY_WIFI_STA_SSID
+            string "Wifi Router SSID"
+            default "your_wifi_router_ssid"
+            help
+                SSID associated to Wifi as defined in the Wifi Router.
+
+        config GATEWAY_WIFI_STA_PASS
+            string "Wifi Router Password"
+            default "your_wifi_router_password"
+            help
+                Password associated to Wifi as defined in the 
+                Wifi Router.
+
+        choice
+            prompt "Wifi Router Authorization Mode"
+            default GATEWAY_WIFI_STA_WPA2
+            help
+                Authorization mode as defined in your router.
+            config GATEWAY_WIFI_STA_WPA3
+                bool "WPA3"
+            config GATEWAY_WIFI_STA_WPA2
+                bool "WPA2"
+            config GATEWAY_WIFI_STA_WPA
+                bool "WPA"
+            config GATEWAY_WIFI_STA_WEP
+                bool "WEP"
+        endchoice
+
+        config GATEWAY_WIFI_AP_SSID
+            depends on GATEWAY_ENABLE_ESP_NOW
+            string "Wifi AP SSID"
+            default "your_wifi_ap_ssid"
+            help
+                SSID associated to the gateway Wifi AP for gateway 
+                discovery by sensors.
+
+        config GATEWAY_WIFI_AP_PASS
+            depends on GATEWAY_ENABLE_ESP_NOW
+            string "Wifi AP Password"
+            default "your_wifi_ap_password"
+            help
+                Password associated to the gateway Wifi AP for gateway
+                discovery by sensors. Can be empty for an open AP.
+
+        choice
+            prompt "Wifi AP Authorization Mode"
+            default GATEWAY_WIFI_AP_WPA2
+            help
+                Authorization mode as defined in your router.
+            config GATEWAY_WIFI_AP_WPA3
+                bool "WPA3"
+            config GATEWAY_WIFI_AP_WPA2
+                bool "WPA2"
+            config GATEWAY_WIFI_AP_WPA
+                bool "WPA"
+            config GATEWAY_WIFI_AP_WEP
+                bool "WEP"
+        endchoice
+
+    endmenu
 endmenu

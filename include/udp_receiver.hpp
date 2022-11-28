@@ -1,7 +1,7 @@
 #pragma once
 
 #include "config.hpp"
-#ifdef UDP_GATEWAY
+#ifdef CONFIG_GATEWAY_ENABLE_UDP
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
