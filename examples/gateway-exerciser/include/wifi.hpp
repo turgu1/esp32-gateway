@@ -10,7 +10,7 @@
 class Wifi
 {
   public:
-    #ifdef UDP_SENDER
+    #ifdef CONFIG_EXERCISER_ENABLE_UDP
       enum class State : int8_t {
         NOT_INITIALIZED,
         INITIALIZED,
@@ -31,7 +31,7 @@ class Wifi
     MacAddr            mac_addr;
     MacAddrStr         mac_addr_cstr;
 
-    #ifdef UDP_SENDER
+    #ifdef CONFIG_EXERCISER_ENABLE_UDP
       static State      state;
       static std::mutex mutex;
       static int8_t     rssi;
@@ -56,7 +56,7 @@ class Wifi
     inline const MacAddr *      get_mac(void) { return &mac_addr; }
     inline const char    * get_mac_cstr(void) { return mac_addr_cstr; }
 
-    #ifdef UDP_SENDER
+    #ifdef CONFIG_EXERCISER_ENABLE_UDP
       inline const State   &    get_state(void) { return state; }
       inline uint32_t              get_ip(void) { return ip; }
       inline const char    *  get_ip_cstr(void) { return ip_cstr; }

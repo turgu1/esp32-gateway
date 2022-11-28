@@ -1,14 +1,13 @@
 #pragma once
 
-#include "config.hpp"
+#include "global.hpp"
+
 #ifdef CONFIG_GATEWAY_ENABLE_ESP_NOW
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
 #include <esp_check.h>
 #include <esp_now.h>
-
-#include "global.hpp"
 
 class ESPNowReceiver
 {

@@ -4,7 +4,7 @@
 
 // Class variables
 
-#ifdef UDP_SENDER
+#ifdef CONFIG_EXERCISER_ENABLE_UDP
   std::mutex  Wifi::mutex                   = {};
   Wifi::State Wifi::state                   = State::NOT_INITIALIZED;
   uint32_t    Wifi::ip                      = 0;
@@ -16,16 +16,16 @@
 
 Wifi::Wifi(void)
 {
-  esp_log_level_set(TAG, CONFIG_GATEWAY_LOG_LEVEL);
+  esp_log_level_set(TAG, CONFIG_EXERCISER_LOG_LEVEL);
 
-  #ifdef UDP_SENDER
+  #ifdef CONFIG_EXERCISER_ENABLE_UDP
     mac_addr_cstr[0] = 0;
     wifi_init_cfg    = WIFI_INIT_CONFIG_DEFAULT();
     memset(&wifi_sta_cfg, 0, sizeof(wifi_config_t));
   #endif
 }
 
-#ifdef UDP_SENDER
+#ifdef CONFIG_EXERCISER_ENABLE_UDP
   void Wifi::wifi_event_handler(void             * arg, 
                                 esp_event_base_t   event_base,
                                 int32_t            event_id, 
@@ -189,7 +189,7 @@ Wifi::Wifi(void)
 
 esp_err_t Wifi::init()
 {
-  #ifdef ESP_NOW_SENDER
+  #ifdef CONFIG_EXERCISER_ENABLE_ESP_NOW
 
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
 
@@ -201,7 +201,7 @@ esp_err_t Wifi::init()
 
     return ESP_OK;
 
-  #else // UDP_SENDER
+  #else // CONFIG_EXERCISER_ENABLE_UDP
 
     state = State::NOT_INITIALIZED;
 
@@ -224,8 +224,8 @@ esp_err_t Wifi::init()
     wifi_sta_cfg.sta.threshold.authmode = WIFI_STA_AUTH_MODE;
     wifi_sta_cfg.sta.pmf_cfg.capable    = true;
     wifi_sta_cfg.sta.pmf_cfg.required   = false;
-    memcpy(wifi_sta_cfg.sta.ssid,     CONFIG_GATEWAY_WIFI_STA_SSID, std::min(strlen(CONFIG_GATEWAY_WIFI_STA_SSID),     sizeof(wifi_sta_cfg.sta.ssid)));
-    memcpy(wifi_sta_cfg.sta.password, CONFIG_GATEWAY_WIFI_STA_PASS, std::min(strlen(CONFIG_GATEWAY_WIFI_STA_PASS), sizeof(wifi_sta_cfg.sta.password)));
+    memcpy(wifi_sta_cfg.sta.ssid,     CONFIG_EXERCISER_WIFI_STA_SSID, std::min(strlen(CONFIG_EXERCISER_WIFI_STA_SSID),     sizeof(wifi_sta_cfg.sta.ssid)));
+    memcpy(wifi_sta_cfg.sta.password, CONFIG_EXERCISER_WIFI_STA_PASS, std::min(strlen(CONFIG_EXERCISER_WIFI_STA_PASS), sizeof(wifi_sta_cfg.sta.password)));
 
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_sta_cfg));
     ESP_ERROR_CHECK(esp_wifi_start());
@@ -239,11 +239,8 @@ esp_err_t Wifi::init()
 // Get default MAC from API and convert to ASCII HEX
 esp_err_t Wifi::retrieve_mac(void)
 {
-  #ifdef WIFI_AP_ENABLE
-    const esp_err_t status = esp_read_mac(mac_addr,  ESP_MAC_WIFI_SOFTAP);
-  #else
-    const esp_err_t status = esp_read_mac((uint8_t *) mac_addr,  ESP_MAC_WIFI_STA);
-  #endif
+
+  const esp_err_t status = esp_read_mac((uint8_t *) mac_addr,  ESP_MAC_WIFI_STA);
 
   if (status == ESP_OK) {
     snprintf(mac_addr_cstr, sizeof(mac_addr_cstr), MACSTR, MAC2STR((char *) mac_addr));

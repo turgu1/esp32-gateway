@@ -4,5 +4,3 @@
 .vscode/launch.json
 .vscode/ipch
 sdkconfig*
-include/global.hpp
-include/secret.hpp

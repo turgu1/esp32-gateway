@@ -2,7 +2,7 @@
 
 #include "global.hpp"
 
-#ifdef UDP_SENDER
+#ifdef CONFIG_EXERCISER_ENABLE_UDP
 
 #include <lwip/sockets.h>
 

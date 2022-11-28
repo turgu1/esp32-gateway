@@ -2,7 +2,7 @@
 
 #include "global.hpp"
 
-#ifdef ESP_NOW_SENDER
+#ifdef CONFIG_EXERCISER_ENABLE_ESP_NOW
 
 #include <freertos/FreeRTOS.h>
 #include <esp_now.h>

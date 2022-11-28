@@ -18,7 +18,7 @@
 
 #include <esp_log.h>
 
-#include "config.hpp"
+#include "global.hpp"
 
 void dump_data(const char *tag, const uint8_t * data, int len) 
 {

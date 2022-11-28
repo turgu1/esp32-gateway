@@ -5,7 +5,7 @@
 #include <esp_wifi.h>
 #include <esp_event.h>
 
-#include "config.hpp"
+#include "global.hpp"
 
 class Wifi
 {

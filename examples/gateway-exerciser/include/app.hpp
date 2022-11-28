@@ -6,11 +6,11 @@
 #include "global.hpp"
 #include "wifi.hpp"
 
-#ifdef UDP_SENDER
+#ifdef CONFIG_EXERCISER_ENABLE_UDP
   #include "udp_sender.hpp"
 #endif
 
-#ifdef ESP_NOW_SENDER
+#ifdef CONFIG_EXERCISER_ENABLE_ESP_NOW
   #include "esp_now_sender.hpp"
 #endif
 
@@ -24,11 +24,11 @@ class App
     
     Wifi wifi;
 
-    #ifdef UDP_SENDER
+    #ifdef CONFIG_EXERCISER_ENABLE_UDP
       static UDPSender udp;
     #endif
 
-    #ifdef ESP_NOW_SENDER
+    #ifdef CONFIG_EXERCISER_ENABLE_ESP_NOW
       static ESPNowSender esp_now;
     #endif
 

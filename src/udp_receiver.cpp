@@ -1,10 +1,9 @@
-#include "config.hpp"
+#include "global.hpp"
 #ifdef CONFIG_GATEWAY_ENABLE_UDP
 
 #include <esp_log.h>
 #include <esp_crc.h>
 
-#include "global.hpp"
 #include "utils.hpp"
 #include "udp_receiver.hpp"
 

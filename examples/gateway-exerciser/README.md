@@ -5,11 +5,6 @@ simple packets every second using UDP or ESP-NOW protocol depending on it's conf
 
 ### Configuration
 
-The following files must be adjusted to reflect your environment:
+The Gateway Exerciser configuration is done through the menuconfig capability associated with ESP-IDF. The following PlatformIO's menu option can be used to access the menuconfig application: `Run Menuconfig`.
 
-- `include/global.hpp`
-- `include/secret.hpp`
-
-Both files are absent from the retrieved project. Vanilla versions of the files are supplied in the`include` folder: `global-dist.hpp` and `secret-dist.hpp`.
-
-This project uses the ESP-IDF framework. Platformio is used to control the compilation process. 
+All options for the Gateway will be found under the menuconfig entry named `Gateway Exerciser`.

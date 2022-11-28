@@ -4,11 +4,11 @@
 
 xTaskHandle App::task = nullptr;
 
-#ifdef UDP_SENDER
+#ifdef CONFIG_EXERCISER_ENABLE_UDP
   UDPSender    App::udp;
 #endif
 
-#ifdef ESP_NOW_SENDER
+#ifdef CONFIG_EXERCISER_ENABLE_ESP_NOW
   ESPNowSender App::esp_now;
 #endif
 
@@ -16,7 +16,7 @@ esp_err_t App::init()
 {
   esp_err_t status = ESP_OK;
 
-  esp_log_level_set(TAG, CONFIG_GATEWAY_LOG_LEVEL);
+  esp_log_level_set(TAG, CONFIG_EXERCISER_LOG_LEVEL);
 
   // Initialize NVS
   status = nvs_flash_init();
@@ -29,7 +29,7 @@ esp_err_t App::init()
 
   ESP_ERROR_CHECK(wifi.init());
 
-  #ifdef UDP_SENDER
+  #ifdef CONFIG_EXERCISER_ENABLE_UDP
     wifi.show_state();
 
     Wifi::State state = wifi.get_state();
@@ -41,14 +41,14 @@ esp_err_t App::init()
     if (state == Wifi::State::ERROR) return ESP_FAIL;
   #endif
 
-  #ifdef UDP_SENDER
+  #ifdef CONFIG_EXERCISER_ENABLE_UDP
     // UDPSender initialization
 
     status = udp.init();
     ESP_ERROR_CHECK(status);
   #endif
 
-  #ifdef ESP_NOW_SENDER
+  #ifdef CONFIG_EXERCISER_ENABLE_ESP_NOW
     // EspNowSender initialization
 
     ESP_LOGD(TAG, "Remote MAC addr: " MACSTR, MAC2STR(GATEWAY_MAC_ADDR));
@@ -90,11 +90,11 @@ void App::main_task(void * params)
 
     int len = strlen(msg) + 1; // We send the null char at the end too
 
-    #ifdef UDP_SENDER
+    #ifdef CONFIG_EXERCISER_ENABLE_UDP
       udp.send((const uint8_t *) msg, len);
     #endif
 
-    #ifdef ESP_NOW_SENDER
+    #ifdef CONFIG_EXERCISER_ENABLE_ESP_NOW
       esp_now.send((const uint8_t *) msg, len);
     #endif
 

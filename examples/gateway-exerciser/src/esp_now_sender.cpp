@@ -1,6 +1,6 @@
 #include "global.hpp"
 
-#ifdef ESP_NOW_SENDER
+#ifdef CONFIG_EXERCISER_ENABLE_ESP_NOW
 
 #include <cstring>
 #include <esp_crc.h>
@@ -15,7 +15,7 @@ esp_err_t ESPNowSender::init(const uint8_t * remote_ap_mac_addr)
 {
   esp_err_t status;
 
-  esp_log_level_set(TAG, CONFIG_GATEWAY_LOG_LEVEL);
+  esp_log_level_set(TAG, CONFIG_EXERCISER_LOG_LEVEL);
 
   memcpy(ap_mac_addr, remote_ap_mac_addr, sizeof(ap_mac_addr));
 
@@ -23,33 +23,30 @@ esp_err_t ESPNowSender::init(const uint8_t * remote_ap_mac_addr)
 
   // ESP_ERROR_CHECK(esp_now_register_recv_cb(send_handler));
  
-  ESP_ERROR_CHECK(status = esp_now_set_pmk((const uint8_t *) CONFIG_GATEWAY_ESPNOW_PMK));
+  ESP_ERROR_CHECK(status = esp_now_set_pmk((const uint8_t *) CONFIG_EXERCISER_ESPNOW_PMK));
 
-  esp_now_peer_info_t * peer = (esp_now_peer_info_t *) malloc(sizeof(esp_now_peer_info_t));
-  if (peer == NULL) {
-      ESP_LOGE(TAG, "Malloc peer information fail");
-//      vSemaphoreDelete(s_example_espnow_queue);
-      esp_now_deinit();
-      return ESP_FAIL;
-  }
+  esp_now_peer_info_t peer;
+  memset(&peer, 0, sizeof(esp_now_peer_info_t));
 
-  memset(peer, 0, sizeof(esp_now_peer_info_t));
-  memcpy(peer->peer_addr, ap_mac_addr, 6);
-  memcpy(peer->lmk, ESP_NOW_LMK, ESP_NOW_KEY_LEN);
+  memcpy(peer.peer_addr, ap_mac_addr, 6);
 
-  peer->channel   = CONFIG_GATEWAY_CHANNEL;
-  peer->ifidx     = (wifi_interface_t) ESP_IF_WIFI_STA;
-  peer->encrypt   = false;
+  peer.channel   = CONFIG_EXERCISER_CHANNEL;
+  peer.ifidx     = (wifi_interface_t) ESP_IF_WIFI_STA;
 
-  ESP_LOGD(TAG, "AP Peer MAC address: " MACSTR, MAC2STR(peer->peer_addr));
+  #ifdef CONFIG_EXERCISER_ENCRYPT
+    peer.encrypt   = true;
+    memcpy(peer.lmk, CONFIG_EXERCISER_ESPNOW_LMK, ESP_NOW_KEY_LEN);
+  #else
+    peer.encrypt   = false;
+  #endif
+
+  ESP_LOGD(TAG, "AP Peer MAC address: " MACSTR, MAC2STR(peer.peer_addr));
 
   ESP_LOGD(TAG, "esp_now_add_peer()...");
 
-  ESP_ERROR_CHECK(status = esp_now_add_peer(peer));
-  
-  free(peer);
+  ESP_ERROR_CHECK(status = esp_now_add_peer(&peer));
 
-  ESP_ERROR_CHECK(esp_wifi_set_channel(CONFIG_GATEWAY_CHANNEL, WIFI_SECOND_CHAN_NONE));
+  ESP_ERROR_CHECK(esp_wifi_set_channel(CONFIG_EXERCISER_CHANNEL, WIFI_SECOND_CHAN_NONE));
 
   ESP_LOGD(TAG, "End of ESPNowSender.init().");
 
@@ -81,13 +78,13 @@ void ESPNowSender::send_handler(const MacAddr * mac_addr, const uint8_t * incomi
 esp_err_t ESPNowSender::send(const uint8_t * data, int len)
 {
   esp_err_t status;
-  struct {
+  static struct {
     uint16_t crc;
-    char data[MAX_PKT_SIZE];
+    char data[CONFIG_EXERCISER_ESPNOW_MAX_PKT_SIZE];
   } __attribute__((packed)) pkt;
 
-  if (len > MAX_PKT_SIZE) {
-    ESP_LOGE(TAG, "Cannot send data of length %d, too long. Max is %d.", len, MAX_PKT_SIZE);
+  if (len > CONFIG_EXERCISER_ESPNOW_MAX_PKT_SIZE) {
+    ESP_LOGE(TAG, "Cannot send data of length %d, too long. Max is %d.", len, CONFIG_EXERCISER_ESPNOW_MAX_PKT_SIZE);
     status = ESP_FAIL;
   }
   else {

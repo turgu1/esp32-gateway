@@ -1,7 +1,6 @@
 #include <nvs_flash.h>
 #include <esp_log.h>
 
-#include "config.hpp"
 #include "global.hpp"
 #include "utils.hpp"
 #include "app.hpp"

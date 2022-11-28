@@ -15,6 +15,7 @@ Here are the principal characteristics:
 - Verbose output for debugging and monitoring through standard ESP32 development board USB port.
 - Allow for the use of a **JSON diet** format in the sensor received packets: when possible, double quotes can be omitted and will be added before being sent to the MQTT server. This is to optimize the packet length coming from the sensor.
 - ESP-IDF based. PlatformIO is used to manage the gateway build process.
+- Support for ESP-NOW encryption through a pre-defined list of encrypted (sensing) devices.
 
 The gateway is expected to be powered through an AC adaptor and be always ON.
 
@@ -23,7 +24,7 @@ The gateway is expected to be powered through an AC adaptor and be always ON.
 The received packet from ESP-NOW/UDP sensors is expected to have the following fields in the order shown:
 
 - A 16 bits CRC checksum. It is automatically computed and added to the packet by the esp_now class.
-- A topic name suffix (normally ASCII characters) followed by a separator. That suffix is used by the gateway to generate a topic name of the form `<topic name prefix>/<topic name suffix>`. For example, if the topic name prefix is `iot/` and the topic name suffix is `home_temp` the MQTT topic will be `iot/home_temp`. The topic name prefix is adjustable in the `config.hpp` file. The separator can be `;` for **JSON diet** content, or `|` for plain content.
+- A topic name suffix (normally ASCII characters) followed by a separator. That suffix is used by the gateway to generate a topic name of the form `<topic name prefix>/<topic name suffix>`. For example, if the topic name prefix is `iot/` and the topic name suffix is `home_temp` the MQTT topic will be `iot/home_temp`. The topic name prefix is adjustable through `menuconfig`. The separator can be `;` for **JSON diet** content, or `|` for plain content.
 - The data to be sent to the MQTT server. It can be some text, JSON, **JSON diet**, or even binary.
 
 ### Plain content
@@ -32,7 +33,7 @@ No specific processing is done on plain content: it is sent as-is to the MQTT br
 
 ### JSON diet
 
-The **JSON diet** format is a version of the JSON format for which double quotes arround simple strings are omitted.
+The **JSON diet** format is a version of the JSON format for which double quotes around simple strings are omitted.
 
 The gateway's **JSON diet** processing adds double quotes on strings without them. It also eliminates irrelevant spaces that could be part of the packet. It keeps everything present after the last `}`. If a string contains any of the following characters or starts with a number character, it is required that the input string in the received packet stay with double quotes:
 
@@ -56,13 +57,13 @@ ESP-NOW relies on the use of a single channel to transmit packets between device
 
 ### ESP-NOW Encrypted devices
 
-Pre-defined peer encrypted devices can be identified in the `src/config.cpp` file. A list of keys (6 maximum) and the list of mac addresses/key pointers are used to identify the peers to be added at boot time. The table actual sizes are located in `include/config.hpp` and can be adjusted if needed (mainly the LMK_KEY_COUNT, and ENCRYPTED_DEVICES_COUNT constants). 
+Pre-defined peer-encrypted devices can be identified in the `src/config.cpp` file. A list of keys (6 maximum) and the list of mac addresses/key pointers are used to identify the peers to be added at boot time. The table's actual sizes are located in `include/config.hpp` and can be adjusted if needed (mainly the LMK_KEY_COUNT, and ENCRYPTED_DEVICES_COUNT constants). 
 
-This is to simplify the interaction between the gateway and the sensors that require encryption. Note that the number of encrypted devices is limited to 6. No specific protocol is then required, the sensors can immediatly send encrypted packets, optimizing power usage. 
+This is to simplify the interaction between the gateway and the sensors that require encryption. Note that the number of encrypted devices is limited to 6. No specific protocol is then required, the sensors can immediately send encrypted packets, optimizing power usage. 
  
 ----
 
-This project uses the ESP-IDF framework. Platformio is used to control the compilation process. 
+This project uses the ESP-IDF framework. PlatformIO is used to control the compilation process. 
 
 For now, this is a one-way capability (sensors only). The following enhancements will come after the basic functionality is completed:
 
@@ -71,3 +72,11 @@ For now, this is a one-way capability (sensors only). The following enhancements
 3) End-to-end two-way communication
 4) Gateway's web-based config access and logging
 5) OTA support
+
+### Copyright (c) 2022 Guy Turcotte
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this project and associated documentation files (the "Project Content"), to deal in the Project without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Project Content, and to permit persons to whom the Project Content is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Project Content.
+
+THE PROJECT CONTENT IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE PROJECT CONTENT OR THE USE OR OTHER DEALINGS IN THE PROJECT CONTENT.

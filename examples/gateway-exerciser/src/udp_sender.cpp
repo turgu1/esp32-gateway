@@ -1,6 +1,6 @@
 #include "global.hpp"
 
-#ifdef UDP_SENDER
+#ifdef CONFIG_EXERCISER_ENABLE_UDP
 
 #include <cstring>
 #include <esp_crc.h>
@@ -10,13 +10,13 @@
 
 esp_err_t UDPSender::init()
 {
-  esp_log_level_set(TAG, CONFIG_GATEWAY_LOG_LEVEL);
+  esp_log_level_set(TAG, CONFIG_EXERCISER_LOG_LEVEL);
 
   esp_err_t status = ESP_OK;
 
   dest_addr.sin_addr.s_addr = inet_addr(GATEWAY_IP_ADDR);
   dest_addr.sin_family      = AF_INET;
-  dest_addr.sin_port        = htons(UDP_OUT_PORT);
+  dest_addr.sin_port        = htons(CONFIG_EXERCISER_UDP_PORT);
   
   int addr_family           = AF_INET;
   int ip_protocol           = IPPROTO_IP;
@@ -34,14 +34,14 @@ esp_err_t UDPSender::send(const uint8_t * data, int len)
 {
   esp_err_t status = ESP_OK;
 
-  struct {
+  static struct {
     uint16_t crc;
-    char data[MAX_PKT_SIZE];
+    char data[CONFIG_EXERCISER_UDP_MAX_PKT_SIZE];
   } __attribute__((packed)) pkt;
 
 
-  if (len > MAX_PKT_SIZE) {
-    ESP_LOGE(TAG, "Cannot send data of length %d, too long. Max is %d.", len, MAX_PKT_SIZE);
+  if (len > CONFIG_EXERCISER_UDP_MAX_PKT_SIZE) {
+    ESP_LOGE(TAG, "Cannot send data of length %d, too long. Max is %d.", len, CONFIG_EXERCISER_UDP_MAX_PKT_SIZE);
     status = ESP_FAIL;
   }
   else {
