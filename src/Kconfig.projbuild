@@ -55,7 +55,7 @@ menu "ESP-32 Gateway Configuration"
         config GATEWAY_UDP_MAX_PKT_SIZE
             int "UDP Max Packet Size"
             default 250
-            range 2 1500
+            range 2 1450
             help
                 The UDP maximum packet size allowed. The first 2 bytes are
                 reseved for the CRC checksum.

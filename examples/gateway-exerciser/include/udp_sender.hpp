@@ -1,6 +1,6 @@
 #pragma once
 
-#include "global.hpp"
+#include "config.hpp"
 
 #ifdef CONFIG_EXERCISER_ENABLE_UDP
 

@@ -23,8 +23,6 @@ esp_err_t ESPNowReceiver::init(QueueHandle_t queue)
   ESP_ERROR_CHECK(status = esp_now_set_pmk((const uint8_t *) CONFIG_GATEWAY_ESPNOW_PMK));
   ESP_ERROR_CHECK(esp_now_register_recv_cb(receive_handler));
 
-  ESP_ERROR_CHECK(esp_wifi_set_channel(CONFIG_GATEWAY_CHANNEL, WIFI_SECOND_CHAN_NONE));
-
   if (ENCRYPTED_DEVICES_COUNT > 0) {
     ESP_LOGI(TAG, "----- Encrypted devices: -----");
     for (int i = 0; i < ENCRYPTED_DEVICES_COUNT; i++) {

@@ -5,7 +5,7 @@
 #include <esp_wifi.h>
 #include <esp_event.h>
 
-#include "global.hpp"
+#include "config.hpp"
 
 class Wifi
 {
@@ -30,11 +30,12 @@ class Wifi
 
     MacAddr            mac_addr;
     MacAddrStr         mac_addr_cstr;
+      
+    static int8_t      rssi;
 
     #ifdef CONFIG_EXERCISER_ENABLE_UDP
       static State      state;
       static std::mutex mutex;
-      static int8_t     rssi;
       static uint32_t   ip;
       static char       ip_cstr[20];
 
@@ -55,12 +56,13 @@ class Wifi
 
     inline const MacAddr *      get_mac(void) { return &mac_addr; }
     inline const char    * get_mac_cstr(void) { return mac_addr_cstr; }
+    inline int8_t              get_rssi(void) { return rssi; }
+    static inline void         set_rssi(int8_t r) { rssi = r; }
 
     #ifdef CONFIG_EXERCISER_ENABLE_UDP
       inline const State   &    get_state(void) { return state; }
       inline uint32_t              get_ip(void) { return ip; }
       inline const char    *  get_ip_cstr(void) { return ip_cstr; }
-      inline int8_t              get_rssi(void) { return rssi; }
       static void              show_state();
     #endif
 };

@@ -1,16 +1,10 @@
-#include <nvs_flash.h>
+#include <esp_sleep.h>
 
 #include "app.hpp"
 
+#include "global.hpp"
+
 xTaskHandle App::task = nullptr;
-
-#ifdef CONFIG_EXERCISER_ENABLE_UDP
-  UDPSender    App::udp;
-#endif
-
-#ifdef CONFIG_EXERCISER_ENABLE_ESP_NOW
-  ESPNowSender App::esp_now;
-#endif
 
 esp_err_t App::init() 
 {
@@ -18,15 +12,15 @@ esp_err_t App::init()
 
   esp_log_level_set(TAG, CONFIG_EXERCISER_LOG_LEVEL);
 
-  // Initialize NVS
-  status = nvs_flash_init();
-  if (status == ESP_ERR_NVS_NO_FREE_PAGES || status == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-    if ((status = nvs_flash_erase()) == ESP_OK) status = nvs_flash_init();
+  esp_reset_reason_t reason = esp_reset_reason();
+
+  if (reason != ESP_RST_DEEPSLEEP) {
+    sequence_number = 0;
+    error_count = 0;
   }
-  ESP_ERROR_CHECK(status);
 
+  ESP_ERROR_CHECK(nvs_mgr.init());
   ESP_ERROR_CHECK(esp_event_loop_create_default());
-
   ESP_ERROR_CHECK(wifi.init());
 
   #ifdef CONFIG_EXERCISER_ENABLE_UDP
@@ -51,8 +45,7 @@ esp_err_t App::init()
   #ifdef CONFIG_EXERCISER_ENABLE_ESP_NOW
     // EspNowSender initialization
 
-    ESP_LOGD(TAG, "Remote MAC addr: " MACSTR, MAC2STR(GATEWAY_MAC_ADDR));
-    status = esp_now.init(GATEWAY_MAC_ADDR);
+    status = esp_now.init();
     ESP_ERROR_CHECK(status);
   #endif
 
@@ -70,37 +63,59 @@ void App::main_task(void * params)
 {
   ESP_LOGD(TAG, "Start of Main Task...");
 
-  static int toggle = 0;
-  const char * msg;
+  bool toggle = false;
+  char msg[100];
 
-  while (true) {
-
-    ESP_LOGD(TAG, "Loop...");
-
-    if (toggle == 0) {
-      // JSON packet being sent
-      msg = "toto|{\"string1\":[23,{\"string2\":\"string3\"}]}";
-    }
-    else {
-      // JSON Lite packet being sent
-      msg = "toto;{string1:[23,{string2:string3}]}";
-    }
-
-    toggle ^= 1;
-
-    int len = strlen(msg) + 1; // We send the null char at the end too
-
-    #ifdef CONFIG_EXERCISER_ENABLE_UDP
-      udp.send((const uint8_t *) msg, len);
-    #endif
-
-    #ifdef CONFIG_EXERCISER_ENABLE_ESP_NOW
-      esp_now.send((const uint8_t *) msg, len);
-    #endif
-
-    vTaskDelay(pdMS_TO_TICKS(1000));
+  if (toggle) {
+    // JSON Diet version
+    sprintf(msg, "%s;{seq:%d,rssi:%d,err:%d}", 
+      CONFIG_EXERCISER_TOPIC_SUFFIX, 
+      sequence_number++, 
+      wifi.get_rssi(), 
+      error_count);
+  }
+  else {
+    sprintf(msg, "%s|{\"seq\":%d,\"rssi\":%d,\"err\":%d}", 
+      CONFIG_EXERCISER_TOPIC_SUFFIX, 
+      sequence_number++, 
+      wifi.get_rssi(), 
+      error_count);
   }
 
+  toggle = !toggle;
+
+  int len = strlen(msg) + 1; // We send the null char at the end too
+
+  #ifdef CONFIG_EXERCISER_ENABLE_UDP
+    udp.send((const uint8_t *) msg, len); // will return after pacquet completly transmitted
+  #endif
+
+  #ifdef CONFIG_EXERCISER_ENABLE_ESP_NOW
+    xQueueHandle send_handle = esp_now.get_sent_queue_handle();
+    esp_now.send((const uint8_t *) msg, len);
+    ESPNowSender::SendEvent evt;
+    if (send_handle != nullptr) {
+      if (xQueueReceive(send_handle, &evt, pdMS_TO_TICKS(1000)) != pdTRUE) {
+        ESP_LOGE(TAG, "No answer after packet sent.");
+        error_count++;
+      }
+      else {
+        if (evt.status != ESP_OK) error_count++;
+      }
+    }
+  #endif
+
+  #ifdef CONFIG_EXERCISER_ENABLE_UDP
+    udp.prepare_for_deep_sleep();
+  #endif
+
+  #ifdef CONFIG_EXERCISER_ENABLE_ESP_NOW
+    esp_now.prepare_for_deep_sleep();
+  #endif
+
+  wifi.prepare_for_deep_sleep();
+
+  esp_deep_sleep(10*1e6); // never return
 
   ESP_LOGE(TAG, "Leaving Main Task.");
 }

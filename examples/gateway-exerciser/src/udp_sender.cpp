@@ -1,9 +1,11 @@
-#include "global.hpp"
+#include "config.hpp"
 
 #ifdef CONFIG_EXERCISER_ENABLE_UDP
 
 #include <cstring>
 #include <esp_crc.h>
+#include <lwip/dns.h>
+#include <netdb.h>
 
 #include "utils.hpp"
 #include "udp_sender.hpp"
@@ -14,7 +16,22 @@ esp_err_t UDPSender::init()
 
   esp_err_t status = ESP_OK;
 
-  dest_addr.sin_addr.s_addr = inet_addr(GATEWAY_IP_ADDR);
+  hostent * h = gethostbyname(CONFIG_EXERCISER_GATEWAY_ADDRESS);
+  in_addr addr;
+
+  int i = 0;
+  addr.s_addr = 0;
+
+  while (h->h_addr_list[i] != 0) {
+    addr.s_addr = *(u_long *) h->h_addr_list[i++];
+    ESP_LOGD(TAG, "\tIPv4 Address #%d: %s\n", i, inet_ntoa(addr));
+  }
+
+  if (addr.s_addr == 0) {
+    ESP_LOGE(TAG, "Unable to retrieve IP address of %s.", CONFIG_EXERCISER_GATEWAY_ADDRESS);
+  }
+
+  dest_addr.sin_addr.s_addr = addr.s_addr;
   dest_addr.sin_family      = AF_INET;
   dest_addr.sin_port        = htons(CONFIG_EXERCISER_UDP_PORT);
   

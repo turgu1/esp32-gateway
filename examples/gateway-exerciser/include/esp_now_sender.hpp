@@ -1,6 +1,6 @@
 #pragma once
 
-#include "global.hpp"
+#include "config.hpp"
 
 #ifdef CONFIG_EXERCISER_ENABLE_ESP_NOW
 
@@ -9,19 +9,29 @@
 
 class ESPNowSender
 {
+  public:
+    struct SendEvent {
+      esp_err_t status;
+      MacAddr mac_addr;
+    };
+
   private:
     static constexpr char const * TAG = "ESP-NOW Sender";
 
     static bool          abort;
-
-    //static void send_handler(const MacAddr * mac_addr, const uint8_t * incoming_data, int len);
+    static QueueHandle_t send_queue_handle;
+    static SendEvent     send_event;
+    static void send_handler(const uint8_t * mac_addr, esp_now_send_status_t status);
 
     MacAddr ap_mac_addr;
 
+    esp_err_t search_ap();
+
   public:
-    esp_err_t               init(const uint8_t * remote_ap_mac_addr);
-    esp_err_t               send(const uint8_t * data, int len);
-    void  prepare_for_deep_sleep();
+    esp_err_t                          init();
+    esp_err_t                          send(const uint8_t * data, int len);
+    QueueHandle_t     get_sent_queue_handle() { return send_queue_handle; }
+    void             prepare_for_deep_sleep();
 };
 
 #endif

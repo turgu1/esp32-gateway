@@ -20,6 +20,13 @@ menu "Gateway Exerciser"
             bool "Verbose"
     endchoice
     
+    config EXERCISER_TOPIC_SUFFIX
+        string "MQTT Topic Suffix"
+        default "topic_suffix"
+        help
+            Enter the topic suffix that will be used by the gateway to
+            generate the topic to be sent to the MQTT broker.
+            
     choice
         prompt "Transmission Protocol"
         default EXERCISER_ENABLE_ESP_NOW
@@ -39,7 +46,7 @@ menu "Gateway Exerciser"
             default 3333
             range 0 65535
             help
-                The UDP Port to be used by devices to transmit packets to the
+                The UDP Port to be used the exerciser to transmit packets to the
                 gateway.
 
         config EXERCISER_UDP_MAX_PKT_SIZE
@@ -49,6 +56,13 @@ menu "Gateway Exerciser"
             help
                 The UDP maximum packet size allowed. The first 2 bytes are
                 reseved for the CRC checksum.
+
+        config EXERCISER_GATEWAY_ADDRESS
+            string "Gateway Address"
+            default "0.0.0.0"
+            help
+                Enter the Gateway address. It can be entered as a standard IPv4
+                dotted decimal notation (xx.xx.xx.xx) or as a DNS name.
     endmenu
 
     menu "ESP-NOW Protocol"
@@ -56,10 +70,18 @@ menu "Gateway Exerciser"
             string "ESP-NOW primary master key"
             default "pmk1234567890123"
             help
-                ESP-NOW primary master key for the ESP-NOW devices and gateway
-                to use. The length of ESPNOW primary master must be 16 bytes.
+                ESP-NOW Primary Master Key (PMK) for the exerciser and gateway
+                to use. The length of the key must be 16 characters. 
                 Please ensure that the key is in synch with the PMK defined in the
                 gateway.
+
+        config EXERCISER_APSSID_PREFIX
+            string "Gateway AP SSID Prefix"
+            default "RX"
+            help
+                Enter the beginning of the SSID for the gateway Access Point (AP).
+                This will be used to find the AP MAC adress to transmit ESP-NOW 
+                packets to the gateway.
 
         config EXERCISER_ENCRYPT
             bool "Encryption enabled"
@@ -72,8 +94,8 @@ menu "Gateway Exerciser"
             string "ESP-NOW local master key"
             default "lmk1234567890123"
             help
-                ESP-NOW local master key for the ESP-NOW devices and gateway
-                to use. The length of ESPNOW local master must be 16 bytes.
+                ESP-NOW local master key (LMK) for the exerciser
+                to use. The length of LMK must be 16 characters.
                 Please ensure that the key reflects the gateway configuration.
 
         config EXERCISER_CHANNEL
@@ -83,7 +105,8 @@ menu "Gateway Exerciser"
             help
                 The channel to be used by the gateway. Note that it must be
                 the same as defined in the WiFi router. Usual values are 1,
-                6, or 11. These values are to diminish potential interference.
+                6, or 11. These prefered values are to diminish potential r/f
+                interference.
 
         config EXERCISER_ESPNOW_MAX_PKT_SIZE
             int "ESP-NOW Max Packet Size"
@@ -101,17 +124,35 @@ menu "Gateway Exerciser"
     endmenu
 
     menu "Wifi"
-        config EXERCISER_WIFI_STA_SSID
+        config EXERCISER_WIFI_ESP_NOW_STA_SSID
+            depends on EXERCISER_ENABLE_ESP_NOW
             string "Wifi Gateway SSID"
             default "your_wifi_gateway_ssid"
             help
-                SSID associated to Wifi as defined in your gateway.
+                SSID associated to Wifi as defined in your gateway. Will be used 
+                to find the gateway MAC address when unknown. 
 
-        config EXERCISER_WIFI_STA_PASS
+        config EXERCISER_WIFI_ESP_NOW_STA_PASS
+            depends on EXERCISER_ENABLE_ESP_NOW
             string "Wifi Gateway Password"
             default "your_wifi_gateway_password"
             help
                 Password associated to Wifi as defined in your gateway.
+                Can be empty.
+
+        config EXERCISER_WIFI_UDP_STA_SSID
+            depends on EXERCISER_ENABLE_UDP
+            string "Wifi Router SSID"
+            default "your_wifi_router_ssid"
+            help
+                Wifi SSID as defined in your router.
+
+        config EXERCISER_WIFI_UDP_STA_PASS
+            depends on EXERCISER_ENABLE_UDP
+            string "Wifi Router Password"
+            default "your_wifi_router_password"
+            help
+                Wifi Password as defined in your router.
                 Can be empty.
 
         choice

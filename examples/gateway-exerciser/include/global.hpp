@@ -1,53 +1,38 @@
 #pragma once
 
-#include <lwip/sockets.h>
-#include <esp_log.h>
-#include <esp_err.h>
-#include <esp_now.h>
+#include "config.hpp"
 
-#if defined(CONFIG_EXERCISER_ENABLE_UDP) && defined(CONFIG_EXERCISER_ENABLE_ESP_NOW)
-  #error "You must define only one of CONFIG_EXERCISER_ENABLE_UDP or CONFIG_EXERCISER_ENABLE_ESP_NOW"
+#include "wifi.hpp"
+#include "nvs_mgr.hpp"
+
+#ifdef CONFIG_EXERCISER_ENABLE_UDP
+  #include "udp_sender.hpp"
 #endif
 
-#if !defined(CONFIG_EXERCISER_ENABLE_UDP) && !defined(CONFIG_EXERCISER_ENABLE_ESP_NOW)
-  #error "You must define one of CONFIG_EXERCISER_ENABLE_UDP or CONFIG_EXERCISER_ENABLE_ESP_NOW"
+#ifdef CONFIG_EXERCISER_ENABLE_ESP_NOW
+  #include "esp_now_sender.hpp"
 #endif
 
-typedef uint8_t MacAddr[6];
-typedef char    MacAddrStr[18];
+#ifndef __GLOBAL__
+  #ifndef __WIFI__
+    extern Wifi   wifi;
+  #endif
+  #ifndef __NVS_MGR__
+    extern NVSMgr nvs_mgr;
+  #endif
 
-// Define the log level for all classes
-// One of (ESP_LOG_<suffix>: NONE, ERROR, WARN, INFO, DEBUG, VERBOSE
-//
-// To take effect the CONFIG_LOG_MAXIMUM_LEVEL configuration parameter must
-// be as high as the targeted log level. This is set in menuconfig:
-//     Component config > Log output > Maximum log verbosity
-constexpr const esp_log_level_t LOG_LEVEL = ESP_LOG_VERBOSE;
+  #ifdef CONFIG_EXERCISER_ENABLE_UDP
+    #ifndef __UDP_SENDER__
+      extern UDPSender udp;
+    #endif
+  #endif
 
-// Log Level
-
-#if defined(CONFIG_EXERCISER_LOG_NONE)
-  #define CONFIG_EXERCISER_LOG_LEVEL ESP_LOG_NONE
-#elif defined(CONFIG_EXERCISER_LOG_ERROR)
-  #define CONFIG_EXERCISER_LOG_LEVEL ESP_LOG_ERROR
-#elif defined(CONFIG_EXERCISER_LOG_WARN)
-  #define CONFIG_EXERCISER_LOG_LEVEL ESP_LOG_WARN
-#elif defined(CONFIG_EXERCISER_LOG_INFO)
-  #define CONFIG_EXERCISER_LOG_LEVEL ESP_LOG_INFO
-#elif defined(CONFIG_EXERCISER_LOG_DEBUG)
-  #define CONFIG_EXERCISER_LOG_LEVEL ESP_LOG_DEBUG
-#elif defined(CONFIG_EXERCISER_LOG_VERBOSE)
-  #define CONFIG_EXERCISER_LOG_LEVEL ESP_LOG_VERBOSE
+  #ifdef CONFIG_EXERCISER_ENABLE_ESP_NOW
+    #ifndef __ESP_NOW_SENDER__
+      extern ESPNowSender esp_now;
+    #endif
+  #endif
 #endif
 
-// Router authorization mode
-
-#if defined(CONFIG_EXERCISER_WIFI_STA_WPA3)
-  #define WIFI_STA_AUTH_MODE WIFI_AUTH_WPA3_PSK
-#elif defined(CONFIG_EXERCISER_WIFI_STA_WPA2)
-  #define WIFI_STA_AUTH_MODE WIFI_AUTH_WPA2_PSK
-#elif defined(CONFIG_GEXERCISERWIFI_STA_WPA)
-  #define WIFI_STA_AUTH_MODE WIFI_AUTH_WPA_PSK
-#elif defined(CONFIG_EXERCISER_WIFI_STA_WEP)
-  #define WIFI_STA_AUTH_MODE WIFI_AUTH_WEP_PSK
-#endif
+extern uint32_t sequence_number;
+extern uint32_t error_count;

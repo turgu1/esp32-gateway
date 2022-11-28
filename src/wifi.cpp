@@ -199,11 +199,14 @@ esp_err_t Wifi::init()
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_sta_cfg));
 
     #if WIFI_AP_ENABLE
+      // The following AP configuration is used to permit the discovery of the gateway by
+      // ESP-NOW devices. As the maximum connection is set to 0, no device can be hooked
+      // in station mode.
       memcpy(wifi_ap_cfg.ap.ssid,     CONFIG_GATEWAY_WIFI_AP_SSID, std::min(strlen(CONFIG_GATEWAY_WIFI_AP_SSID),     sizeof(wifi_ap_cfg.ap.ssid)));
       memcpy(wifi_ap_cfg.ap.password, CONFIG_GATEWAY_WIFI_AP_PASS, std::min(strlen(CONFIG_GATEWAY_WIFI_AP_PASS), sizeof(wifi_ap_cfg.ap.password)));
       wifi_ap_cfg.ap.authmode       = WIFI_AP_AUTH_MODE;
       wifi_ap_cfg.ap.ssid_len       = strlen(CONFIG_GATEWAY_WIFI_AP_SSID);
-      wifi_ap_cfg.ap.max_connection = 5;
+      wifi_ap_cfg.ap.max_connection = 0;
       wifi_ap_cfg.ap.channel        = CONFIG_GATEWAY_CHANNEL;
 
       if (strlen(CONFIG_GATEWAY_WIFI_AP_PASS) == 0) {

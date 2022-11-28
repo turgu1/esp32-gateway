@@ -4,11 +4,12 @@
 
 // Class variables
 
+int8_t        Wifi::rssi                    = 0;
+
 #ifdef CONFIG_EXERCISER_ENABLE_UDP
   std::mutex  Wifi::mutex                   = {};
   Wifi::State Wifi::state                   = State::NOT_INITIALIZED;
   uint32_t    Wifi::ip                      = 0;
-  int8_t      Wifi::rssi                    = 0;
   char        Wifi::ip_cstr[20]             = "0.0.0.0";
 #endif
 
@@ -215,17 +216,23 @@ esp_err_t Wifi::init()
     }
 
     ESP_ERROR_CHECK(esp_netif_init());
+
+    if (esp_netif_create_default_wifi_sta() == nullptr) {
+      ESP_LOGE(TAG, "Unable to create default wifi STA.");
+      return ESP_FAIL;
+    }
+
     ESP_ERROR_CHECK(esp_wifi_init(&wifi_init_cfg));
     ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_event_handler, nullptr, nullptr));
     ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT, ESP_EVENT_ANY_ID, &ip_event_handler, nullptr, nullptr));
     ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
 
+    memcpy(wifi_sta_cfg.sta.ssid,     CONFIG_EXERCISER_WIFI_UDP_STA_SSID, std::min(strlen(CONFIG_EXERCISER_WIFI_UDP_STA_SSID),     sizeof(wifi_sta_cfg.sta.ssid)));
+    memcpy(wifi_sta_cfg.sta.password, CONFIG_EXERCISER_WIFI_UDP_STA_PASS, std::min(strlen(CONFIG_EXERCISER_WIFI_UDP_STA_PASS), sizeof(wifi_sta_cfg.sta.password)));
     wifi_sta_cfg.sta.threshold.authmode = WIFI_STA_AUTH_MODE;
     wifi_sta_cfg.sta.pmf_cfg.capable    = true;
     wifi_sta_cfg.sta.pmf_cfg.required   = false;
-    memcpy(wifi_sta_cfg.sta.ssid,     CONFIG_EXERCISER_WIFI_STA_SSID, std::min(strlen(CONFIG_EXERCISER_WIFI_STA_SSID),     sizeof(wifi_sta_cfg.sta.ssid)));
-    memcpy(wifi_sta_cfg.sta.password, CONFIG_EXERCISER_WIFI_STA_PASS, std::min(strlen(CONFIG_EXERCISER_WIFI_STA_PASS), sizeof(wifi_sta_cfg.sta.password)));
 
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_sta_cfg));
     ESP_ERROR_CHECK(esp_wifi_start());
@@ -252,6 +259,11 @@ esp_err_t Wifi::retrieve_mac(void)
 
 void Wifi::prepare_for_deep_sleep()
 {
+  #ifdef CONFIG_EXERCISER_ENABLE_UDP
+    esp_event_handler_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_event_handler);
+    esp_event_handler_unregister(IP_EVENT, ESP_EVENT_ANY_ID, &ip_event_handler);
+  #endif
+  
   esp_err_t status = esp_wifi_stop();
   if (status != ESP_OK) {
     ESP_LOGW(TAG, "Unable to stop Wifi Properly: %s.", esp_err_to_name(status));

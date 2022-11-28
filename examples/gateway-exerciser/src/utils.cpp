@@ -3,7 +3,7 @@
 #include <cstdio>
 #include <cctype>
 
-#include "global.hpp"
+#include "config.hpp"
 
 void dump_data(const char *tag, const uint8_t * data, int len) 
 {
@@ -24,6 +24,7 @@ void dump_data(const char *tag, const uint8_t * data, int len)
       else {
         strcpy(&buff[k], "   ");
       }
+      if (i == 7) buff[k++] = ' ';
       k += 3;
     }
     strcpy(&buff[k], "  |");
@@ -34,6 +35,7 @@ void dump_data(const char *tag, const uint8_t * data, int len)
                         ? data[pos + i] 
                         : '.') 
                     : ' ';
+      if (i == 7) buff[k++] = ' ';
     }
     strcpy(&buff[k], "|");
     ESP_LOGD(tag, "%s", buff);

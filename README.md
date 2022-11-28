@@ -1,6 +1,6 @@
 ### ESP32-Gateway - ESP32 based ESP-NOW/UDP -> MQTT gateway
 
-2022-11-27 - Version 0.2
+2022-11-28 - Version 0.2.0
 
 This project is working. This is still under heavy modification.
 
@@ -11,7 +11,7 @@ Using ESP-NOW, an ESP32 sensor can read a PIO and send a packet in less than a s
 Here are the principal characteristics:
 
 - UDP and ESP-NOW sender support: UDP can be used for any kind of sensor that can send UDP packets on the local network. ESP-NOW can be used with Espressif-supported devices (ESP32 and ESP8266 families, maybe others)
-- Packet size limit of 248 bytes for ESP-NOW and configurable for UDP.
+- Configurable maximum packet size limit. Max of 248 bytes for ESP-NOW and 1450 for UDP.
 - Verbose output for debugging and monitoring through standard ESP32 development board USB port.
 - Allow for the use of a **JSON diet** format in the sensor received packets: when possible, double quotes can be omitted and will be added before being sent to the MQTT server. This is to optimize the packet length coming from the sensor.
 - ESP-IDF based. PlatformIO is used to manage the gateway build process.
@@ -47,7 +47,7 @@ The JSON Lite process doesn't expect UTF-8 (Unicode) characters. Augmented ASCII
 
 ### Configuration
 
-The ESP32 Gateway configuration is done through the menuconfig capability associated with ESP-IDF. The following PlatformIO's menu option can be used to access the menuconfig application: `Run Menuconfig`.
+The ESP32 Gateway configuration is done through the menuconfig capability associated with ESP-IDF. The following PlatformIO's menu option can be used to access the menuconfig application: `Platform > Run Menuconfig`.
 
 All options for the Gateway will be found under the menuconfig entry named `ESP-32 Gateway Configuration`.
 
