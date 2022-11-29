@@ -2,7 +2,7 @@
 
 2022-11-28 - Version 0.2.0
 
-This project is working. This is still under heavy modification.
+Note: This is still under heavy modification. Must be condidered as BETA-Level code.
 
 This is a simple gateway that allows the transmission of ESP-NOW or UDP packets received from other ESP32/ESP8266 to an MQTT server. The intent is to optimize the battery-powered ESP32/ESP8266 sensing devices using ESP-NOW and C/C++ coding instead of Tasmota or ESPHome solutions. Accessing the sensor information from products like OpenHab and HomeAssistant will be then possible through an MQTT server.
 

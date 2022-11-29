@@ -1,5 +1,9 @@
 ### Simple ESP-IDF based ESP-NOW/UDP Exerciser
 
+2022-11-28 - Version 0.2.0
+
+Note: This is still under heavy modification. Must be condidered as BETA-Level code.
+
 This is an exerciser application for the ESP32 Gateway. It sends simple packets every 10 seconds to the gateway. Between transfers, the exerciser is put into deep sleep. The following aspects can be put to test through configuration parameters:
 
 - Using UDP or ESP-NOW protocol
