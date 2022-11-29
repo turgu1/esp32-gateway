@@ -2,25 +2,25 @@ menu "Gateway Exerciser"
 
     choice
         prompt "Log Level"
-        default EXERCISER_LOG_ERROR
+        default IOT_LOG_ERROR
         help
             Max log level used by the exerciser to report various log 
             information on the USB port.
-        config EXERCISER_LOG_NONE
+        config IOT_LOG_NONE
             bool "None"
-        config EXERCISER_LOG_ERROR
+        config IOT_LOG_ERROR
             bool "Error"
-        config EXERCISER_LOG_WARN
+        config IOT_LOG_WARN
             bool "Warning"
-        config EXERCISER_LOG_INFO
+        config IOT_LOG_INFO
             bool "Info"
-        config EXERCISER_LOG_DEBUG
+        config IOT_LOG_DEBUG
             bool "Debug"
-        config EXERCISER_LOG_VERBOSE
+        config IOT_LOG_VERBOSE
             bool "Verbose"
     endchoice
     
-    config EXERCISER_TOPIC_SUFFIX
+    config IOT_TOPIC_SUFFIX
         string "MQTT Topic Suffix"
         default "topic_suffix"
         help
@@ -29,19 +29,19 @@ menu "Gateway Exerciser"
             
     choice
         prompt "Transmission Protocol"
-        default EXERCISER_ENABLE_ESP_NOW
+        default IOT_ENABLE_ESP_NOW
         help
             Select the protocol to be used to transmit packets to
             the ESP32 Gateway.
-        config EXERCISER_ENABLE_UDP
+        config IOT_ENABLE_UDP
             bool "UDP"
-        config EXERCISER_ENABLE_ESP_NOW
+        config IOT_ENABLE_ESP_NOW
             bool "ESP-NOW"
     endchoice
 
     menu "UDP Protocol"
-        depends on EXERCISER_ENABLE_UDP
-        config EXERCISER_UDP_PORT
+        depends on IOT_ENABLE_UDP
+        config IOT_UDP_PORT
             int "UDP Port"
             default 3333
             range 0 65535
@@ -49,7 +49,7 @@ menu "Gateway Exerciser"
                 The UDP Port to be used the exerciser to transmit packets to the
                 gateway.
 
-        config EXERCISER_UDP_MAX_PKT_SIZE
+        config IOT_UDP_MAX_PKT_SIZE
             int "UDP Max Packet Size"
             default 250
             range 2 1450
@@ -57,7 +57,7 @@ menu "Gateway Exerciser"
                 The UDP maximum packet size allowed. The first 2 bytes are
                 reseved for the CRC checksum.
 
-        config EXERCISER_GATEWAY_ADDRESS
+        config IOT_GATEWAY_ADDRESS
             string "Gateway Address"
             default "0.0.0.0"
             help
@@ -66,7 +66,7 @@ menu "Gateway Exerciser"
     endmenu
 
     menu "ESP-NOW Protocol"
-        config EXERCISER_ESPNOW_PMK
+        config IOT_ESPNOW_PMK
             string "ESP-NOW primary master key"
             default "pmk1234567890123"
             help
@@ -75,7 +75,7 @@ menu "Gateway Exerciser"
                 Please ensure that the key is in synch with the PMK defined in the
                 gateway.
 
-        config EXERCISER_APSSID_PREFIX
+        config IOT_APSSID_PREFIX
             string "Gateway AP SSID Prefix"
             default "RX"
             help
@@ -83,15 +83,15 @@ menu "Gateway Exerciser"
                 This will be used to find the AP MAC adress to transmit ESP-NOW 
                 packets to the gateway.
 
-        config EXERCISER_ENCRYPT
+        config IOT_ENCRYPT
             bool "Encryption enabled"
             default "n"
             help
                 Set if this device is using packet encryption. If set, the gateway
                 internal table of encrypted devices must be modified accordingly.
 
-        config EXERCISER_ESPNOW_LMK
-            depends on EXERCISER_ENCRYPT
+        config IOT_ESPNOW_LMK
+            depends on IOT_ENCRYPT
             string "ESP-NOW local master key"
             default "lmk1234567890123"
             help
@@ -99,7 +99,7 @@ menu "Gateway Exerciser"
                 to use. The length of LMK must be 16 characters.
                 Please ensure that the key reflects the gateway configuration.
 
-        config EXERCISER_CHANNEL
+        config IOT_CHANNEL
             int "Channel"
             default 1
             range 0 14
@@ -109,7 +109,7 @@ menu "Gateway Exerciser"
                 6, or 11. These preferred values are to diminish potential r/f
                 interference.
 
-        config EXERCISER_ESPNOW_MAX_PKT_SIZE
+        config IOT_ESPNOW_MAX_PKT_SIZE
             int "ESP-NOW Max Packet Size"
             default 248
             range 10 248
@@ -117,7 +117,7 @@ menu "Gateway Exerciser"
                 The ESP-NOW maximum packet size allowed without considering the CRC.
                  Cannot be larger than 248.
 
-        config EXERCISER_ESPNOW_ENABLE_LONG_RANGE
+        config IOT_ESPNOW_ENABLE_LONG_RANGE
             bool "Enable Long Range"
             default "n"
             help
@@ -126,31 +126,31 @@ menu "Gateway Exerciser"
     endmenu
 
     menu "Wifi"
-        config EXERCISER_WIFI_ESP_NOW_STA_SSID
-            depends on EXERCISER_ENABLE_ESP_NOW
+        config IOT_WIFI_ESP_NOW_STA_SSID
+            depends on IOT_ENABLE_ESP_NOW
             string "Wifi Gateway SSID"
             default "your_wifi_gateway_ssid"
             help
                 SSID associated with Wifi as defined in your gateway. Will be used 
                 to find the gateway MAC address when unknown. 
 
-        config EXERCISER_WIFI_ESP_NOW_STA_PASS
-            depends on EXERCISER_ENABLE_ESP_NOW
+        config IOT_WIFI_ESP_NOW_STA_PASS
+            depends on IOT_ENABLE_ESP_NOW
             string "Wifi Gateway Password"
             default "your_wifi_gateway_password"
             help
                 Password associated with Wifi as defined in your gateway.
                 Can be empty.
 
-        config EXERCISER_WIFI_UDP_STA_SSID
-            depends on EXERCISER_ENABLE_UDP
+        config IOT_WIFI_UDP_STA_SSID
+            depends on IOT_ENABLE_UDP
             string "Wifi Router SSID"
             default "your_wifi_router_ssid"
             help
                 Wifi SSID as defined in your router.
 
-        config EXERCISER_WIFI_UDP_STA_PASS
-            depends on EXERCISER_ENABLE_UDP
+        config IOT_WIFI_UDP_STA_PASS
+            depends on IOT_ENABLE_UDP
             string "Wifi Router Password"
             default "your_wifi_router_password"
             help
@@ -159,16 +159,16 @@ menu "Gateway Exerciser"
 
         choice
             prompt "Wifi Gateway Authorization Mode"
-            default EXERCISER_WIFI_STA_WPA2
+            default IOT_WIFI_STA_WPA2
             help
                 Authorization mode as defined in your gateway.
-            config EXERCISER_WIFI_STA_WPA3
+            config IOT_WIFI_STA_WPA3
                 bool "WPA3"
-            config EXERCISER_WIFI_STA_WPA2
+            config IOT_WIFI_STA_WPA2
                 bool "WPA2"
-            config EXERCISER_WIFI_STA_WPA
+            config IOT_WIFI_STA_WPA
                 bool "WPA"
-            config EXERCISER_WIFI_STA_WEP
+            config IOT_WIFI_STA_WEP
                 bool "WEP"
         endchoice
     endmenu

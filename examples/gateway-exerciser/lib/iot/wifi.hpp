@@ -10,7 +10,7 @@
 class Wifi
 {
   public:
-    #ifdef CONFIG_EXERCISER_ENABLE_UDP
+    #ifdef CONFIG_IOT_ENABLE_UDP
       enum class State : int8_t {
         NOT_INITIALIZED,
         INITIALIZED,
@@ -33,7 +33,7 @@ class Wifi
       
     static int8_t      rssi;
 
-    #ifdef CONFIG_EXERCISER_ENABLE_UDP
+    #ifdef CONFIG_IOT_ENABLE_UDP
       static State      state;
       static std::mutex mutex;
       static uint32_t   ip;
@@ -59,7 +59,7 @@ class Wifi
     inline int8_t              get_rssi(void) { return rssi; }
     static inline void         set_rssi(int8_t r) { rssi = r; }
 
-    #ifdef CONFIG_EXERCISER_ENABLE_UDP
+    #ifdef CONFIG_IOT_ENABLE_UDP
       inline const State   &    get_state(void) { return state; }
       inline uint32_t              get_ip(void) { return ip; }
       inline const char    *  get_ip_cstr(void) { return ip_cstr; }

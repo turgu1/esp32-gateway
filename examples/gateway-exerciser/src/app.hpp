@@ -4,6 +4,7 @@
 #include <freertos/task.h>
 
 #include "config.hpp"
+#include "global.hpp"
 
 class App
 {

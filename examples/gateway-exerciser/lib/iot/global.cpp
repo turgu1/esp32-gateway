@@ -6,11 +6,11 @@
 Wifi   wifi;
 NVSMgr nvs_mgr;
 
-#ifdef CONFIG_EXERCISER_ENABLE_UDP
+#ifdef CONFIG_IOT_ENABLE_UDP
   UDPSender udp;
 #endif
 
-#ifdef CONFIG_EXERCISER_ENABLE_ESP_NOW
+#ifdef CONFIG_IOT_ENABLE_ESP_NOW
   ESPNowSender esp_now;
 #endif
 

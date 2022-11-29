@@ -219,12 +219,12 @@ esp_err_t Wifi::init()
     ESP_ERROR_CHECK(esp_wifi_start());
 
     #if CONFIG_GATEWAY_ESPNOW_ENABLE_LONG_RANGE
-      #pragma message "----> GATEWAY LONG RANGE ENABLED <----"
+      #pragma message "----> INFO: GATEWAY LONG RANGE ENABLED <----"
       ESP_ERROR_CHECK(esp_wifi_set_protocol(
-        ESPNOW_WIFI_IF, 
+        (wifi_interface_t) ESP_IF_WIFI_AP, 
         WIFI_PROTOCOL_11B|WIFI_PROTOCOL_11G|WIFI_PROTOCOL_11N|WIFI_PROTOCOL_LR));
     #else
-      #pragma message "----> GATEWAY LONG RANGE DISABLED <----"
+      #pragma message "----> INFO: GATEWAY LONG RANGE DISABLED <----"
     #endif
 
     state = State::INITIALIZED;

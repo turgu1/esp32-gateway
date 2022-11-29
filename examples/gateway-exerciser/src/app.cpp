@@ -2,15 +2,13 @@
 
 #include "app.hpp"
 
-#include "global.hpp"
-
 xTaskHandle App::task = nullptr;
 
 esp_err_t App::init() 
 {
   esp_err_t status = ESP_OK;
 
-  esp_log_level_set(TAG, CONFIG_EXERCISER_LOG_LEVEL);
+  esp_log_level_set(TAG, CONFIG_IOT_LOG_LEVEL);
 
   esp_reset_reason_t reason = esp_reset_reason();
 
@@ -23,7 +21,7 @@ esp_err_t App::init()
   ESP_ERROR_CHECK(esp_event_loop_create_default());
   ESP_ERROR_CHECK(wifi.init());
 
-  #ifdef CONFIG_EXERCISER_ENABLE_UDP
+  #ifdef CONFIG_IOT_ENABLE_UDP
     wifi.show_state();
 
     Wifi::State state = wifi.get_state();
@@ -35,14 +33,14 @@ esp_err_t App::init()
     if (state == Wifi::State::ERROR) return ESP_FAIL;
   #endif
 
-  #ifdef CONFIG_EXERCISER_ENABLE_UDP
+  #ifdef CONFIG_IOT_ENABLE_UDP
     // UDPSender initialization
 
     status = udp.init();
     ESP_ERROR_CHECK(status);
   #endif
 
-  #ifdef CONFIG_EXERCISER_ENABLE_ESP_NOW
+  #ifdef CONFIG_IOT_ENABLE_ESP_NOW
     // EspNowSender initialization
 
     status = esp_now.init();
@@ -69,14 +67,14 @@ void App::main_task(void * params)
   if (toggle) {
     // JSON Diet version
     sprintf(msg, "%s;{seq:%d,rssi:%d,err:%d}", 
-      CONFIG_EXERCISER_TOPIC_SUFFIX, 
+      CONFIG_IOT_TOPIC_SUFFIX, 
       sequence_number++, 
       wifi.get_rssi(), 
       error_count);
   }
   else {
     sprintf(msg, "%s|{\"seq\":%d,\"rssi\":%d,\"err\":%d}", 
-      CONFIG_EXERCISER_TOPIC_SUFFIX, 
+      CONFIG_IOT_TOPIC_SUFFIX, 
       sequence_number++, 
       wifi.get_rssi(), 
       error_count);
@@ -86,11 +84,11 @@ void App::main_task(void * params)
 
   int len = strlen(msg) + 1; // We send the null char at the end too
 
-  #ifdef CONFIG_EXERCISER_ENABLE_UDP
+  #ifdef CONFIG_IOT_ENABLE_UDP
     udp.send((const uint8_t *) msg, len); // will return after pacquet completly transmitted
   #endif
 
-  #ifdef CONFIG_EXERCISER_ENABLE_ESP_NOW
+  #ifdef CONFIG_IOT_ENABLE_ESP_NOW
     xQueueHandle send_handle = esp_now.get_sent_queue_handle();
     esp_now.send((const uint8_t *) msg, len);
     ESPNowSender::SendEvent evt;
@@ -105,11 +103,11 @@ void App::main_task(void * params)
     }
   #endif
 
-  #ifdef CONFIG_EXERCISER_ENABLE_UDP
+  #ifdef CONFIG_IOT_ENABLE_UDP
     udp.prepare_for_deep_sleep();
   #endif
 
-  #ifdef CONFIG_EXERCISER_ENABLE_ESP_NOW
+  #ifdef CONFIG_IOT_ENABLE_ESP_NOW
     esp_now.prepare_for_deep_sleep();
   #endif
 

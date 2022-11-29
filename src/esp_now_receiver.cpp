@@ -20,6 +20,8 @@ esp_err_t ESPNowReceiver::init(QueueHandle_t queue)
 
   esp_log_level_set(TAG, CONFIG_GATEWAY_LOG_LEVEL);
 
+  static_assert(sizeof(CONFIG_GATEWAY_ESPNOW_PMK) == 17, "The Exerciser's PMK must be 16 characters long.");
+
   ESP_ERROR_CHECK(esp_now_init());
   ESP_ERROR_CHECK(status = esp_now_set_pmk((const uint8_t *) CONFIG_GATEWAY_ESPNOW_PMK));
   ESP_ERROR_CHECK(esp_now_register_recv_cb(receive_handler));

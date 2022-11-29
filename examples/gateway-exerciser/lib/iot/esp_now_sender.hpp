@@ -2,7 +2,7 @@
 
 #include "config.hpp"
 
-#ifdef CONFIG_EXERCISER_ENABLE_ESP_NOW
+#ifdef CONFIG_IOT_ENABLE_ESP_NOW
 
 #include <freertos/FreeRTOS.h>
 #include <esp_now.h>

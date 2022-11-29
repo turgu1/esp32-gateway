@@ -1,6 +1,6 @@
 #include "config.hpp"
 
-#ifdef CONFIG_EXERCISER_ENABLE_UDP
+#ifdef CONFIG_IOT_ENABLE_UDP
 
 #include <cstring>
 #include <esp_crc.h>
@@ -12,11 +12,11 @@
 
 esp_err_t UDPSender::init()
 {
-  esp_log_level_set(TAG, CONFIG_EXERCISER_LOG_LEVEL);
+  esp_log_level_set(TAG, CONFIG_IOT_LOG_LEVEL);
 
   esp_err_t status = ESP_OK;
 
-  hostent * h = gethostbyname(CONFIG_EXERCISER_GATEWAY_ADDRESS);
+  hostent * h = gethostbyname(CONFIG_IOT_GATEWAY_ADDRESS);
   in_addr addr;
 
   int i = 0;
@@ -28,12 +28,12 @@ esp_err_t UDPSender::init()
   }
 
   if (addr.s_addr == 0) {
-    ESP_LOGE(TAG, "Unable to retrieve IP address of %s.", CONFIG_EXERCISER_GATEWAY_ADDRESS);
+    ESP_LOGE(TAG, "Unable to retrieve IP address of %s.", CONFIG_IOT_GATEWAY_ADDRESS);
   }
 
   dest_addr.sin_addr.s_addr = addr.s_addr;
   dest_addr.sin_family      = AF_INET;
-  dest_addr.sin_port        = htons(CONFIG_EXERCISER_UDP_PORT);
+  dest_addr.sin_port        = htons(CONFIG_IOT_UDP_PORT);
   
   int addr_family           = AF_INET;
   int ip_protocol           = IPPROTO_IP;
@@ -53,12 +53,12 @@ esp_err_t UDPSender::send(const uint8_t * data, int len)
 
   static struct {
     uint16_t crc;
-    char data[CONFIG_EXERCISER_UDP_MAX_PKT_SIZE];
+    char data[CONFIG_IOT_UDP_MAX_PKT_SIZE];
   } __attribute__((packed)) pkt;
 
 
-  if (len > CONFIG_EXERCISER_UDP_MAX_PKT_SIZE) {
-    ESP_LOGE(TAG, "Cannot send data of length %d, too long. Max is %d.", len, CONFIG_EXERCISER_UDP_MAX_PKT_SIZE);
+  if (len > CONFIG_IOT_UDP_MAX_PKT_SIZE) {
+    ESP_LOGE(TAG, "Cannot send data of length %d, too long. Max is %d.", len, CONFIG_IOT_UDP_MAX_PKT_SIZE);
     status = ESP_FAIL;
   }
   else {

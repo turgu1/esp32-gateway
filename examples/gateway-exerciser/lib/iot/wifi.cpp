@@ -6,7 +6,7 @@
 
 int8_t        Wifi::rssi                    = 0;
 
-#ifdef CONFIG_EXERCISER_ENABLE_UDP
+#ifdef CONFIG_IOT_ENABLE_UDP
   std::mutex  Wifi::mutex                   = {};
   Wifi::State Wifi::state                   = State::NOT_INITIALIZED;
   uint32_t    Wifi::ip                      = 0;
@@ -17,16 +17,16 @@ int8_t        Wifi::rssi                    = 0;
 
 Wifi::Wifi(void)
 {
-  esp_log_level_set(TAG, CONFIG_EXERCISER_LOG_LEVEL);
+  esp_log_level_set(TAG, CONFIG_IOT_LOG_LEVEL);
 
-  #ifdef CONFIG_EXERCISER_ENABLE_UDP
+  #ifdef CONFIG_IOT_ENABLE_UDP
     mac_addr_cstr[0] = 0;
     wifi_init_cfg    = WIFI_INIT_CONFIG_DEFAULT();
     memset(&wifi_sta_cfg, 0, sizeof(wifi_config_t));
   #endif
 }
 
-#ifdef CONFIG_EXERCISER_ENABLE_UDP
+#ifdef CONFIG_IOT_ENABLE_UDP
   void Wifi::wifi_event_handler(void             * arg, 
                                 esp_event_base_t   event_base,
                                 int32_t            event_id, 
@@ -190,7 +190,7 @@ Wifi::Wifi(void)
 
 esp_err_t Wifi::init()
 {
-  #ifdef CONFIG_EXERCISER_ENABLE_ESP_NOW
+  #ifdef CONFIG_IOT_ENABLE_ESP_NOW
 
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
 
@@ -200,18 +200,18 @@ esp_err_t Wifi::init()
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
     ESP_ERROR_CHECK(esp_wifi_start());
 
-    #if CONFIG_EXERCISER_ESPNOW_ENABLE_LONG_RANGE
-      #pragma message "----> EXERCISER LONG RANGE ENABLED <----"
+    #if CONFIG_IOT_ESPNOW_ENABLE_LONG_RANGE
+      #pragma message "----> INFO: EXERCISER LONG RANGE ENABLED <----"
       ESP_ERROR_CHECK(esp_wifi_set_protocol(
-        ESPNOW_WIFI_IF, 
+        (wifi_interface_t) ESP_IF_WIFI_STA, 
         WIFI_PROTOCOL_11B|WIFI_PROTOCOL_11G|WIFI_PROTOCOL_11N|WIFI_PROTOCOL_LR));
     #else
-      #pragma message "----> EXERCISER LONG RANGE DISABLED <----"
+      #pragma message "----> INFO: EXERCISER LONG RANGE DISABLED <----"
     #endif
 
     return ESP_OK;
 
-  #else // CONFIG_EXERCISER_ENABLE_UDP
+  #else // CONFIG_IOT_ENABLE_UDP
 
     state = State::NOT_INITIALIZED;
 
@@ -237,8 +237,8 @@ esp_err_t Wifi::init()
     ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
 
-    memcpy(wifi_sta_cfg.sta.ssid,     CONFIG_EXERCISER_WIFI_UDP_STA_SSID, std::min(strlen(CONFIG_EXERCISER_WIFI_UDP_STA_SSID),     sizeof(wifi_sta_cfg.sta.ssid)));
-    memcpy(wifi_sta_cfg.sta.password, CONFIG_EXERCISER_WIFI_UDP_STA_PASS, std::min(strlen(CONFIG_EXERCISER_WIFI_UDP_STA_PASS), sizeof(wifi_sta_cfg.sta.password)));
+    memcpy(wifi_sta_cfg.sta.ssid,     CONFIG_IOT_WIFI_UDP_STA_SSID, std::min(strlen(CONFIG_IOT_WIFI_UDP_STA_SSID),     sizeof(wifi_sta_cfg.sta.ssid)));
+    memcpy(wifi_sta_cfg.sta.password, CONFIG_IOT_WIFI_UDP_STA_PASS, std::min(strlen(CONFIG_IOT_WIFI_UDP_STA_PASS), sizeof(wifi_sta_cfg.sta.password)));
     wifi_sta_cfg.sta.threshold.authmode = WIFI_STA_AUTH_MODE;
     wifi_sta_cfg.sta.pmf_cfg.capable    = true;
     wifi_sta_cfg.sta.pmf_cfg.required   = false;
@@ -268,7 +268,7 @@ esp_err_t Wifi::retrieve_mac(void)
 
 void Wifi::prepare_for_deep_sleep()
 {
-  #ifdef CONFIG_EXERCISER_ENABLE_UDP
+  #ifdef CONFIG_IOT_ENABLE_UDP
     esp_event_handler_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_event_handler);
     esp_event_handler_unregister(IP_EVENT, ESP_EVENT_ANY_ID, &ip_event_handler);
   #endif

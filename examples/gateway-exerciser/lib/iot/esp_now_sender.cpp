@@ -1,17 +1,23 @@
+#include <esp_sleep.h>
+
 #include "config.hpp"
 
-#ifdef CONFIG_EXERCISER_ENABLE_ESP_NOW
+#ifdef CONFIG_IOT_ENABLE_ESP_NOW
 
 #include <cstring>
 #include <esp_crc.h>
 #include <esp_wifi.h>
 #include <esp_system.h>
+#include <assert.h>
 
 #include "utils.hpp"
 #include "esp_now_sender.hpp"
 
 #define __ESP_NOW_SENDER__
 #include "global.hpp"
+
+RTC_NOINIT_ATTR uint32_t gateway_access_error_count;
+RTC_NOINIT_ATTR bool     ap_failed;
 
 bool                    ESPNowSender::abort             = false;
 QueueHandle_t           ESPNowSender::send_queue_handle = nullptr;
@@ -21,7 +27,7 @@ esp_err_t ESPNowSender::init()
 {
   esp_err_t status;
 
-  esp_log_level_set(TAG, CONFIG_EXERCISER_LOG_LEVEL);
+  esp_log_level_set(TAG, CONFIG_IOT_LOG_LEVEL);
 
   send_queue_handle = xQueueCreate(5, sizeof(send_event));
   if (send_queue_handle == nullptr) {
@@ -34,7 +40,12 @@ esp_err_t ESPNowSender::init()
   nvs_mgr.get_nvs_data();
   esp_reset_reason_t reason = esp_reset_reason();
 
-  if (!((reason == ESP_RST_DEEPSLEEP) && nvs_mgr.is_data_valid())) {
+  if (reason != ESP_RST_DEEPSLEEP) {
+    gateway_access_error_count = 0;
+    ap_failed = false;
+  }
+
+  if (!((reason == ESP_RST_DEEPSLEEP) && nvs_mgr.is_data_valid() && !ap_failed)) {
     ESP_ERROR_CHECK(search_ap());
     NVSMgr::NVSData nvs_data;
     memcpy(&nvs_data.gateway_mac_addr, &ap_mac_addr, 6);
@@ -46,21 +57,25 @@ esp_err_t ESPNowSender::init()
     memcpy(&ap_mac_addr, nvs_mgr.get_data()->gateway_mac_addr, 6);
   }
 
+  static_assert(sizeof(CONFIG_IOT_ESPNOW_PMK) == 17, "The Exerciser's PMK must be 16 characters long.");
+
   ESP_ERROR_CHECK(esp_now_init());
   ESP_ERROR_CHECK(esp_now_register_send_cb(send_handler));
-  ESP_ERROR_CHECK(status = esp_now_set_pmk((const uint8_t *) CONFIG_EXERCISER_ESPNOW_PMK));
+  ESP_ERROR_CHECK(status = esp_now_set_pmk((const uint8_t *) CONFIG_IOT_ESPNOW_PMK));
 
   esp_now_peer_info_t peer;
   memset(&peer, 0, sizeof(esp_now_peer_info_t));
 
   memcpy(peer.peer_addr, ap_mac_addr, 6);
 
-  peer.channel   = CONFIG_EXERCISER_CHANNEL;
+  peer.channel   = CONFIG_IOT_CHANNEL;
   peer.ifidx     = (wifi_interface_t) ESP_IF_WIFI_STA;
 
-  #ifdef CONFIG_EXERCISER_ENCRYPT
+  #ifdef CONFIG_IOT_ENCRYPT
+    static_assert(sizeof(CONFIG_IOT_ESPNOW_LMK) == 17, "The Exerciser's LMK must be 16 characters long.");
+
     peer.encrypt   = true;
-    memcpy(peer.lmk, CONFIG_EXERCISER_ESPNOW_LMK, ESP_NOW_KEY_LEN);
+    memcpy(peer.lmk, CONFIG_IOT_ESPNOW_LMK, ESP_NOW_KEY_LEN);
   #else
     peer.encrypt   = false;
   #endif
@@ -68,7 +83,7 @@ esp_err_t ESPNowSender::init()
   ESP_LOGD(TAG, "AP Peer MAC address: " MACSTR, MAC2STR(peer.peer_addr));
 
   ESP_ERROR_CHECK(status = esp_now_add_peer(&peer));
-  ESP_ERROR_CHECK(esp_wifi_set_channel(CONFIG_EXERCISER_CHANNEL, WIFI_SECOND_CHAN_NONE));
+  ESP_ERROR_CHECK(esp_wifi_set_channel(CONFIG_IOT_CHANNEL, WIFI_SECOND_CHAN_NONE));
 
   return status;
 }
@@ -91,11 +106,11 @@ esp_err_t ESPNowSender::send(const uint8_t * data, int len)
   esp_err_t status;
   static struct {
     uint16_t crc;
-    char data[CONFIG_EXERCISER_ESPNOW_MAX_PKT_SIZE];
+    char data[CONFIG_IOT_ESPNOW_MAX_PKT_SIZE];
   } __attribute__((packed)) pkt;
 
-  if (len > CONFIG_EXERCISER_ESPNOW_MAX_PKT_SIZE) {
-    ESP_LOGE(TAG, "Cannot send data of length %d, too long. Max is %d.", len, CONFIG_EXERCISER_ESPNOW_MAX_PKT_SIZE);
+  if (len > CONFIG_IOT_ESPNOW_MAX_PKT_SIZE) {
+    ESP_LOGE(TAG, "Cannot send data of length %d, too long. Max is %d.", len, CONFIG_IOT_ESPNOW_MAX_PKT_SIZE);
     status = ESP_FAIL;
   }
   else {
@@ -120,10 +135,10 @@ esp_err_t ESPNowSender::search_ap()
   wifi_ap_record_t * ap_records;
   uint16_t count;
 
-  ESP_LOGD(TAG, "Scanning AP list to find SSID starting with [%s]...", CONFIG_EXERCISER_APSSID_PREFIX);
+  ESP_LOGD(TAG, "Scanning AP list to find SSID starting with [%s]...", CONFIG_IOT_APSSID_PREFIX);
 
   memset(&config, 0, sizeof(wifi_scan_config_t));
-  config.channel = CONFIG_EXERCISER_CHANNEL;
+  config.channel = CONFIG_IOT_CHANNEL;
   config.scan_type = WIFI_SCAN_TYPE_ACTIVE;
 
   ESP_ERROR_CHECK(esp_wifi_scan_start(&config, true));
@@ -137,18 +152,25 @@ esp_err_t ESPNowSender::search_ap()
 
   ESP_ERROR_CHECK(esp_wifi_scan_get_ap_records(&count, ap_records));
 
-  int len = strlen(CONFIG_EXERCISER_APSSID_PREFIX);
+  int len = strlen(CONFIG_IOT_APSSID_PREFIX);
 
   for (int i = 0; i < count; i++) {
-    if (strncmp((const char *) ap_records[i].ssid, CONFIG_EXERCISER_APSSID_PREFIX, len) == 0) {
+    if (strncmp((const char *) ap_records[i].ssid, CONFIG_IOT_APSSID_PREFIX, len) == 0) {
       memcpy(&ap_mac_addr, ap_records[i].bssid, sizeof(MacAddr)); 
       wifi.set_rssi(ap_records[i].rssi);
       ESP_LOGD(TAG, "Found AP SSID %s:" MACSTR, ap_records[i].ssid, MAC2STR(ap_mac_addr));
+      ap_failed = false;
+      gateway_access_error_count = 0;
       return ESP_OK;
     }
   }
 
-  ESP_LOGE(TAG, "Unable to find Gateway Access Point.");
+  gateway_access_error_count++;
+  ap_failed = true;
+  int wait_time = gateway_access_error_count * gateway_access_error_count * 10;
+  ESP_LOGE(TAG, "Unable to find Gateway Access Point. Waiting for %d seconds...", wait_time);
+
+  esp_deep_sleep(wait_time * 1e6);
 
   return ESP_FAIL;
 }

@@ -2,7 +2,7 @@
 
 #include "config.hpp"
 
-#ifdef CONFIG_EXERCISER_ENABLE_UDP
+#ifdef CONFIG_IOT_ENABLE_UDP
 
 #include <lwip/sockets.h>
 

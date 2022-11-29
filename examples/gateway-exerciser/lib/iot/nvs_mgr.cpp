@@ -35,7 +35,6 @@ esp_err_t NVSMgr::set_nvs_data(NVSData * data)
   data_is_valid = true;
 
   if ((status = nvs_open(NAMESPACE, NVS_READWRITE, &nvs_handle)) == ESP_OK) {
-    size_t len = sizeof(NVSData);
     status = nvs_set_blob(nvs_handle, "DATA", &nvs_data, sizeof(NVSData));
     nvs_close(nvs_handle);
   }
