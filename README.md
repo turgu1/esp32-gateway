@@ -23,15 +23,48 @@ The gateway is expected to be powered through an AC adaptor and be always ON.
 
 The received packet from ESP-NOW/UDP sensors is expected to have the following fields in the order shown:
 
-- A 16 bits CRC checksum. It is automatically computed and added to the packet by the esp_now class.
-- A topic name suffix (normally ASCII characters) followed by a separator. That suffix is used by the gateway to generate a topic name of the form `<topic name prefix>/<topic name suffix>`. For example, if the topic name prefix is `iot/` and the topic name suffix is `home_temp` the MQTT topic will be `iot/home_temp`. The topic name prefix is adjustable through `menuconfig`. The separator can be `;` for **JSON diet** content, or `|` for plain content.
-- The data to be sent to the MQTT server. It can be some text, JSON, **JSON diet**, or even binary.
+- A 16 bits CRC checksum.
+- A sensor's topic name.
+- Optional QoS and RETAIN values.
+- A separator.
+- The data to be sent to the MQTT server. It can be some text, JSON, **JSON diet**  (see the description below), or even binary.
 
-### Plain content
+For example, here is a complete packet (without the CRC) that uses JSON as its content:
+
+```external/temperature[1,0]|{"seq":123,"status":"OK","voltage":3.5}```
+
+#### Sensor's Topic name
+
+The sensor's topic name is used by the gateway to generate a complete topic name of the form `<topic name prefix>/<sensor's topic name>/<topic name suffix>`. 
+
+For example, if the topic name prefix is `iot/`, the topic name suffix is `/state`, and the sensor's topic name is `home_temp` the MQTT topic will be `iot/home_temp/state`. Both topic name prefix and suffix are adjustable through `menuconfig`. 
+
+With this gateway implementation, the following characters cannot be used in a topic name:
+
+``` + # [ | ;```
+
+#### Optional QoS and RETAIN
+
+If required, the topic name can be followed with one or two numbers separated with a comma and put inside square brackets. The first number will be used as the QoS and the second as the RETAIN MQTT parameters.
+
+- QoS (quality of service) can be 0, 1 or 2.
+- Retain can be 0 or 1.
+
+For exemple, here is a topic name followed with QoS and Retain values:
+
+```external/temp[1,1]```
+
+For more details, see [here](https://www.hivemq.com/blog/mqtt-essentials-part-6-mqtt-quality-of-service-levels/).
+
+#### Separator
+
+The separator can be `;` for **JSON diet** content (see the description below), or `|` for plain content.
+
+#### Plain content
 
 No specific processing is done on plain content: it is sent as-is to the MQTT broker.
 
-### JSON diet
+#### JSON diet
 
 The **JSON diet** format is a version of the JSON format for which double quotes around simple strings are omitted.
 
@@ -43,7 +76,15 @@ The following characters are processed as spaces:
 
 ```space horizontal-tab vertical-tab new-line carriage-return form-feed```
 
-The JSON Lite process doesn't expect UTF-8 (Unicode) characters. Augmented ASCII (8 bits characters) is OK.
+For example, the following JSON diet string:
+
+```{seq:123,status:OK,voltage:3.5}```
+
+will be translated to the following JSON string:
+
+```{"seq":123,"status":"OK","voltage":3.5}```
+
+The JSON diet process doesn't expect UTF-8 (Unicode) characters. Augmented ASCII (8 bits characters) is OK.
 
 ### Configuration
 
@@ -70,8 +111,9 @@ For the ESP-NOW Protocol:
 
 For the MQTT Protocol:
 - **MQTT Server URI**: MQTT server URI.
-- **MQTT Server topic prefix**: Topic prefix to use to construct complete topic name, appending device's topic suffix value.
-- **MQTT Default QOS value**: The MQTT QOS value to use when sending messages to the MQTT server.
+- **MQTT Server topic prefix**: Topic prefix to use to construct complete topic name, appending the sensor's topic name to it. Can be empty.
+- **MQTT Server topic suffix**: Topic suffix to use to construct complete topic name, appending it to the sensor's topic name. Can be empty.
+- **MQTT Default QoS value**: The MQTT QoS value to use when sending messages to the MQTT server.
 - **MQTT Default Retain value**: The MQTT Retain value to use when sending messages to the MQTT server.
 - **MQTT Username**: Username as defined in the MQTT server configuration.
 - **MQTT Client Identification**: MQTT Client Id used by the gateway.

@@ -20,12 +20,12 @@ menu "Gateway Exerciser"
             bool "Verbose"
     endchoice
     
-    config IOT_TOPIC_SUFFIX
-        string "MQTT Topic Suffix"
-        default "topic_suffix"
+    config IOT_TOPIC_NAME
+        string "MQTT Topic Name"
+        default "topic_name"
         help
-            Enter the topic suffix that will be used by the gateway to
-            generate the topic to be sent to the MQTT broker.
+            Enter the topic name that will be used by the gateway to
+            generate the complete topic name to be sent to the MQTT broker.
             
     choice
         prompt "Transmission Protocol"

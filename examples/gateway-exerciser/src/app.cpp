@@ -67,14 +67,14 @@ void App::main_task(void * params)
   if (toggle) {
     // JSON Diet version
     sprintf(msg, "%s;{seq:%d,rssi:%d,err:%d}", 
-      CONFIG_IOT_TOPIC_SUFFIX, 
+      CONFIG_IOT_TOPIC_NAME, 
       sequence_number++, 
       wifi.get_rssi(), 
       error_count);
   }
   else {
     sprintf(msg, "%s|{\"seq\":%d,\"rssi\":%d,\"err\":%d}", 
-      CONFIG_IOT_TOPIC_SUFFIX, 
+      CONFIG_IOT_TOPIC_NAME, 
       sequence_number++, 
       wifi.get_rssi(), 
       error_count);

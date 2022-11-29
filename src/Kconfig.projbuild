@@ -108,15 +108,22 @@ menu "ESP-32 Gateway Configuration"
             string "MQTT Server topic prefix"
             default "iot/"
             help
-                Topic prefix to use to construct complete topic name, appending
-                device's topic suffix value.
+                Topic prefix to use to construct complete topic name, appending to it
+                the received sensor's topic name. Can be empty.
+
+        config GATEWAY_MQTT_TOPIC_SUFFIX
+            string "MQTT Server topic suffix"
+            default "/state"
+            help
+                Topic suffix to use to construct complete topic name, appending it
+                to the sensor's topic name. Can be empty.
 
         config GATEWAY_MQTT_DEFAULT_QOS
-            int "MQTT Default QOS value"
+            int "MQTT Default QoS value"
             default 0
             range 0 2
             help
-                The MQTT QOS value to use when sending messages to the
+                The MQTT QoS value to use when sending messages to the
                 MQTT server.
 
         config GATEWAY_MQTT_DEFAULT_RETAIN
