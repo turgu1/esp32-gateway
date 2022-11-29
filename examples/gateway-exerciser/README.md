@@ -1,6 +1,6 @@
 ### Simple ESP-IDF based ESP-NOW/UDP Exerciser
 
-2022-11-28 - Version 0.2.0
+2022-11-29 - Version 0.2.0
 
 Note: This is still under heavy modification. Must be condidered as BETA-Level code.
 

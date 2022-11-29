@@ -1,6 +1,6 @@
 ### ESP32-Gateway - ESP32 based ESP-NOW/UDP → MQTT gateway
 
-2022-11-28 - Version 0.2.0
+2022-11-29 - Version 0.2.0
 
 Note: This is still under heavy modification. Must be condidered as BETA-Level code.
 
