@@ -5,7 +5,7 @@
 #include <freertos/queue.h>
 #include <esp_err.h>
 
-#include "global.hpp"
+#include "config.hpp"
 #include "wifi.hpp"
 #include "mqtt.hpp"
 

@@ -5,6 +5,8 @@
 #include <esp_event.h>
 #include <mqtt_client.h>
 
+#include "config.hpp"
+
 class MQTT
 {
   public:

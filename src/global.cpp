@@ -1,4 +1,4 @@
-#include "config.hpp"
+#include "global.hpp"
 
 #ifdef CONFIG_GATEWAY_ENABLE_ESP_NOW
 

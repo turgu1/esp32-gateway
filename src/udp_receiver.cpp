@@ -1,4 +1,4 @@
-#include "global.hpp"
+#include "config.hpp"
 #ifdef CONFIG_GATEWAY_ENABLE_UDP
 
 #include <esp_log.h>

@@ -51,13 +51,47 @@ The ESP32 Gateway configuration is done through the menuconfig capability associ
 
 All options for the Gateway will be found under the menuconfig entry named `ESP-32 Gateway Configuration`.
 
+Here is the list of the configuration items:
+
+- **Message queue size**: The maximum number of messages queud in the gateway waiting to be sent to the MQTT server.
+- **Log Level**: Maximum log level used by the gateway to report various log information on the USB port.
+- **Enable UDP packet reception**: When enable, a task will wait for UDP packets for transmission to the MQTT broker.
+- **Enable ESP-NOW packet reception**: When enable, a task will wait for ESP-NOW packets for transmission to the MQTT broker.
+
+For the UDP Protocol:
+- **UDP Port**: The UDP Port to be used by devices to transmit packets to the gateway.
+- **UDP Max Packet Size**: The UDP maximum packet size allowed.
+
+For the ESP-NOW Protocol:
+- **Primary Master Key**: The Primary Master Key (PMK) for the ESP-NOW devices and gateway to use. The length of the PMK must be 16 bytes. Please ensure that all devices are using the same PMK.
+- **Channel**: The Wifi channel to be used. Note that it must be the same as defined in the WiFi router. Usual values are 1, 6, or 11. These preferred values are to diminish potential r/f interference.
+- **Max Packet Size**: The ESP-NOW maximum packet size allowed without considering the CRC. Cannot be larger than 248.
+- **Enable Long Range**: When enable long range, the PHY rate of ESP32 will be 512Kbps or 256Kbps.
+
+For the MQTT Protocol:
+- **MQTT Server URI**: MQTT server URI.
+- **MQTT Server topic prefix**: Topic prefix to use to construct complete topic name, appending device's topic suffix value.
+- **MQTT Default QOS value**: The MQTT QOS value to use when sending messages to the MQTT server.
+- **MQTT Default Retain value**: The MQTT Retain value to use when sending messages to the MQTT server.
+- **MQTT Username**: Username as defined in the MQTT server configuration.
+- **MQTT Client Identification**: MQTT Client Id used by the gateway.
+- **MQTT User Password**: Password associated to username as defined in the MQTT server configuration.
+
+For the Wifi sub-system:
+- **Wifi Router SSID**: SSID as defined in the Wifi Router.
+- **Wifi Router Password**: Password as defined in the Wifi Router.
+- **Wifi Router Authorization Mode**: Authorization mode as defined in your router. Can be WEP, WPA, WPA2, WPA3.
+- **Wifi AP SSID**: SSID associated to the gateway Wifi AP for gateway discovery by sensors.
+- **Wifi AP Password**: Password associated to the gateway Wifi AP for gateway discovery by sensors. Can be empty for an open AP.
+- **Wifi AP Authorization Mode**: Authorization mode to be used for the gateway AP. Can be WEP, WPA, WPA2, WPA3.
+
 ### Channel usage
 
 ESP-NOW relies on the use of a single channel to transmit packets between devices. To allow the gateway to transmit packets to the MQTT server, it needs to connect to the Wifi network as a station-mode device. As such, the Wifi router channel is used to communicate. As the ESP32 only has a single Wifi antenna, the same channel must be used for both Station connection to the Wifi network and ESP-NOW. It is then important to freeze the router channel (usually to one of 1, 6, or 11 to mitigate interference between channels) and configure all ESP-NOW devices to use that channel.
 
 ### ESP-NOW Encrypted devices
 
-Pre-defined peer-encrypted devices can be identified in the `src/config.cpp` file. A list of keys (6 maximum) and the list of mac addresses/key pointers are used to identify the peers to be added at boot time. The table's actual sizes are located in `include/config.hpp` and can be adjusted if needed (mainly the LMK_KEY_COUNT, and ENCRYPTED_DEVICES_COUNT constants). 
+Pre-defined peer-encrypted devices can be identified in the `src/global.cpp` file. A list of keys (6 maximum) and the list of mac addresses/key pointers are used to identify the peers to be added at boot time. The table's actual sizes are located in `include/globl.hpp` and can be adjusted if needed (namely the LMK_KEY_COUNT, and ENCRYPTED_DEVICES_COUNT constants). 
 
 This is to simplify the interaction between the gateway and the sensors that require encryption. Note that the number of encrypted devices is limited to 6. No specific protocol is then required, the sensors can immediately send encrypted packets, optimizing power usage. 
  

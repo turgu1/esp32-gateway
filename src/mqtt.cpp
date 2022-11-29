@@ -1,6 +1,5 @@
 #include <esp_log.h>
 
-#include "global.hpp"
 #include "mqtt.hpp"
 #include "utils.hpp"
 

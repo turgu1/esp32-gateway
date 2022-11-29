@@ -52,7 +52,7 @@ menu "Gateway Exerciser"
         config EXERCISER_UDP_MAX_PKT_SIZE
             int "UDP Max Packet Size"
             default 250
-            range 2 1500
+            range 2 1450
             help
                 The UDP maximum packet size allowed. The first 2 bytes are
                 reseved for the CRC checksum.
@@ -105,7 +105,7 @@ menu "Gateway Exerciser"
             help
                 The channel to be used by the gateway. Note that it must be
                 the same as defined in the WiFi router. Usual values are 1,
-                6, or 11. These prefered values are to diminish potential r/f
+                6, or 11. These preferred values are to diminish potential r/f
                 interference.
 
         config EXERCISER_ESPNOW_MAX_PKT_SIZE
@@ -114,6 +114,7 @@ menu "Gateway Exerciser"
             range 10 248
             help
                 The ESP-NOW maximum packet size allowed without considering the CRC.
+                 Cannot be larger than 248.
 
         config EXERCISER_ESPNOW_ENABLE_LONG_RANGE
             bool "Enable Long Range"

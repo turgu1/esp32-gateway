@@ -22,18 +22,18 @@ Here is the list of the configuration items:
 - **MQTT Topic Suffix**: The topic suffix that will be used by the gateway to generate the topic to be sent to the MQTT broker.
 - **Transmission Protocol**: The protocol to be used to transmit packets to the ESP32 Gateway. One of **UDP** or **ESP-NOW**.
 
-For UDP Protocol:
+For the UDP Protocol:
 - **UDP Port**: The UDP Port to be used by the exerciser to transmit packets to the gateway.
 - **UDP Max Packet Size**: The UDP maximum packet size allowed.
 - **Gateway Address**: The Gateway address. It can be entered as a standard IPv4 dotted decimal notation (xx.xx.xx.xx) or as a DNS name.
 
-For ESP-NOW Protocol:
+For the ESP-NOW Protocol:
 - **Primary Master Key**: The Primary Master Key (PMK) to use. The length of the PMK must be 16 characters. Please ensure that the key is in synch with the PMK defined in the gateway.
 - **Gateway AP SSID Prefix**: The beginning of the SSID for the gateway Access Point (AP). This will be used to find the AP MAC address to transmit ESP-NOW packets to the gateway.
 - **Encryption Enabled**: Set if this device is using packet encryption. If set, the gateway internal table of crypted devices must be modified accordingly.
 - **Local Master Key**: If encryption is enabled, the Local Master Key (LMK) for the exerciser to use. The length of LMK must be 16 characters. Please ensure that the LMK reflects the gateway configuration.
-- **Channel**: The channel to be used by the gateway. Note that it must be the same as defined in the WiFi router. Usual values are 1, 6, or 11. These prefered values are to diminish potential r/f interference.
-- **Max Packet Size**: The ESP-NOW maximum packet size allowed without considering the CRC.
+- **Channel**: The Wifi channel to be used. Note that it must be the same as defined in the WiFi router. Usual values are 1, 6, or 11. These preferred values are to diminish potential r/f interference.
+- **Max Packet Size**: The ESP-NOW maximum packet size allowed without considering the CRC.  Cannot be larger than 248.
 - **Enable Long Range**: When enable long range, the PHY rate of ESP32 will be 512Kbps or 256Kbps.
 
 For the Wifi sub-system:

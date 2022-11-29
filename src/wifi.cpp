@@ -1,7 +1,6 @@
 #include "esp_log.h"
 #include "esp_netif.h"
 
-#include "global.hpp"
 #include "wifi.hpp"
 
 // Class variables
@@ -218,6 +217,12 @@ esp_err_t Wifi::init()
     
     ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_NONE));
     ESP_ERROR_CHECK(esp_wifi_start());
+
+    #if CONFIG_GATEWAY_ESPNOW_ENABLE_LONG_RANGE
+      ESP_ERROR_CHECK(esp_wifi_set_protocol(
+        ESPNOW_WIFI_IF, 
+        WIFI_PROTOCOL_11B|WIFI_PROTOCOL_11G|WIFI_PROTOCOL_11N|WIFI_PROTOCOL_LR));
+    #endif
 
     state = State::INITIALIZED;
   }

@@ -6,6 +6,7 @@
 #include <esp_wifi.h>
 
 #include "utils.hpp"
+#include "global.hpp"
 #include "esp_now_receiver.hpp"
 
 QueueHandle_t ESPNowReceiver::msg_queue = nullptr;
@@ -57,14 +58,14 @@ void ESPNowReceiver::receive_handler(const uint8_t * mac_addr, const uint8_t * i
   pkt = (PKT *) incoming_data;
   int data_length = len - 2;
 
-  // If MAC address does not exist in peer list, add it to the list.
+  // If MAC address does not exist in peer list, add it to the list. It must be a
+  // peer without encryption, as the encrypted peers have been already added to the list.
   if (esp_now_is_peer_exist(mac_addr) == false) {
     esp_now_peer_info_t peer;
     memset(&peer, 0, sizeof(esp_now_peer_info_t));
     peer.channel = CONFIG_GATEWAY_CHANNEL;
     peer.ifidx   = (wifi_interface_t) ESP_IF_WIFI_AP;
     peer.encrypt = false;
-    //memcpy(peer.lmk, ESP_NOW_LMK, ESP_NOW_KEY_LEN);
     memcpy(peer.peer_addr, mac_addr, ESP_NOW_ETH_ALEN);
     ESP_ERROR_CHECK(esp_now_add_peer(&peer));
   }

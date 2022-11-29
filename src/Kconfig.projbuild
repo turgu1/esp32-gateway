@@ -64,11 +64,11 @@ menu "ESP-32 Gateway Configuration"
     menu "ESP-NOW Protocol"
         depends on GATEWAY_ENABLE_ESP_NOW
         config GATEWAY_ESPNOW_PMK
-            string "ESP-NOW primary master key"
+            string "ESP-NOW Primary Master Key"
             default "pmk1234567890123"
             help
-                ESP-NOW primary master key for the ESP-NOW devices and gateway
-                to use. The length of ESPNOW primary master must be 16 bytes.
+                ESP-NOW Primary Master Key (PMK) for the ESP-NOW devices and gateway
+                to use. The length of the PMK must be 16 bytes.
                 Please ensure that all devices are using the same PMK.
 
         config GATEWAY_CHANNEL
@@ -76,9 +76,18 @@ menu "ESP-32 Gateway Configuration"
             default 1
             range 0 14
             help
-                The channel to be used by the gateway. Note that it must be
+                The Wifi channel to be used. Note that it must be
                 the same as defined in the WiFi router. Usual values are 1,
-                6, or 11. These values are to diminish potential interference.
+                6, or 11. These preferred values are to diminish potential r/f
+                interference.
+
+        config GATEWAY_ESPNOW_MAX_PKT_SIZE
+            int "ESP-NOW Max Packet Size"
+            default 248
+            range 10 248
+            help
+                The ESP-NOW maximum packet size allowed without considering the CRC.
+                 Cannot be larger than 248.
 
         config GATEWAY_ESPNOW_ENABLE_LONG_RANGE
             bool "Enable Long Range"
@@ -144,14 +153,13 @@ menu "ESP-32 Gateway Configuration"
             string "Wifi Router SSID"
             default "your_wifi_router_ssid"
             help
-                SSID associated to Wifi as defined in the Wifi Router.
+                SSID as defined in the Wifi Router.
 
         config GATEWAY_WIFI_STA_PASS
             string "Wifi Router Password"
             default "your_wifi_router_password"
             help
-                Password associated to Wifi as defined in the 
-                Wifi Router.
+                Password as defined in the Wifi Router.
 
         choice
             prompt "Wifi Router Authorization Mode"
@@ -188,7 +196,7 @@ menu "ESP-32 Gateway Configuration"
             prompt "Wifi AP Authorization Mode"
             default GATEWAY_WIFI_AP_WPA2
             help
-                Authorization mode as defined in your router.
+                Authorization mode to be used for the gateway AP.
             config GATEWAY_WIFI_AP_WPA3
                 bool "WPA3"
             config GATEWAY_WIFI_AP_WPA2
@@ -198,6 +206,5 @@ menu "ESP-32 Gateway Configuration"
             config GATEWAY_WIFI_AP_WEP
                 bool "WEP"
         endchoice
-
     endmenu
 endmenu
