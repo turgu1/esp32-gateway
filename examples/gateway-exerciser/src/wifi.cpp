@@ -201,9 +201,12 @@ esp_err_t Wifi::init()
     ESP_ERROR_CHECK(esp_wifi_start());
 
     #if CONFIG_EXERCISER_ESPNOW_ENABLE_LONG_RANGE
+      #pragma message "----> EXERCISER LONG RANGE ENABLED <----"
       ESP_ERROR_CHECK(esp_wifi_set_protocol(
         ESPNOW_WIFI_IF, 
         WIFI_PROTOCOL_11B|WIFI_PROTOCOL_11G|WIFI_PROTOCOL_11N|WIFI_PROTOCOL_LR));
+    #else
+      #pragma message "----> EXERCISER LONG RANGE DISABLED <----"
     #endif
 
     return ESP_OK;
