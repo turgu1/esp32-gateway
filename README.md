@@ -6,7 +6,7 @@ Note: This is still under heavy modification. Must be condidered as BETA-Level c
 
 This is a simple gateway that allows the transmission of ESP-NOW or UDP packets received from other ESP32/ESP8266 to an MQTT server. The intent is to optimize the battery-powered ESP32/ESP8266 sensing devices using ESP-NOW and C/C++ coding instead of Tasmota or ESPHome solutions. Accessing the sensor information from products like OpenHab and HomeAssistant will be then possible through an MQTT server.
 
-Using ESP-NOW, an ESP32 sensor can read a PIO and send a packet in less than a second from the device bootstrap to the packet transmission to the gateway.
+Using ESP-NOW, an ESP32 sensor can read a PIO and send a packet in less than a second from device bootstrap to packet transmission. Normal Wifi transmission would require several seconds to complete.
 
 Here are the principal characteristics:
 
@@ -47,14 +47,14 @@ The JSON Lite process doesn't expect UTF-8 (Unicode) characters. Augmented ASCII
 
 ### Configuration
 
-The ESP32 Gateway configuration is done through the menuconfig capability associated with ESP-IDF. The following PlatformIO's menu option can be used to access the menuconfig application: `Platform > Run Menuconfig`.
+The ESP32 Gateway configuration is done through the menuconfig capability associated with ESP-IDF. The following PlatformIO's menu option can be used to access the menuconfig application: `Platform → Run Menuconfig`.
 
 All options for the Gateway will be found under the menuconfig entry named `ESP-32 Gateway Configuration`.
 
 Here is the list of the configuration items:
 
 - **Message queue size**: The maximum number of messages queued in the gateway waiting to be sent to the MQTT server.
-- **Log Level**: Maximum log level used by the gateway to report various log information on the USB port. The ESP-IDF maximum log level may require to be adjusted according to this item. It can be found in menuconfig at the following location: `Component config > Log output > Maximum log verbosity`.
+- **Log Level**: Maximum log level used by the gateway to report various log information on the USB port. The ESP-IDF maximum log level may require to be adjusted according to this item. It can be found in menuconfig at the following location: `Component config → Log output → Maximum log verbosity`.
 - **Enable UDP packet reception**: When enabled, a task will wait for UDP packets for transmission to the MQTT broker.
 - **Enable ESP-NOW packet reception**: When enabled, a task will wait for ESP-NOW packets for transmission to the MQTT broker.
 
