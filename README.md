@@ -19,7 +19,7 @@ Here are the principal characteristics:
 
 The gateway is expected to be powered through an AC adaptor and be always ON.
 
-### Packet format
+### 1. Packet format
 
 The received packet from ESP-NOW/UDP sensors is expected to have the following fields in the order shown:
 
@@ -33,7 +33,7 @@ For example, here is a complete packet (without the CRC) that uses JSON as its c
 
 ```external/temperature[1,0]|{"seq":123,"status":"OK","voltage":3.5}```
 
-#### Sensor's Topic name
+#### 1.1 Sensor's Topic name
 
 The sensor's topic name is used by the gateway to generate a complete topic name of the form `<topic name prefix>/<sensor's topic name>/<topic name suffix>`. 
 
@@ -43,7 +43,7 @@ With this gateway implementation, the following characters cannot be used in a t
 
 ``` + # [ | ;```
 
-#### Optional QoS and RETAIN
+#### 1.2 Optional QoS and RETAIN
 
 If required, the topic name can be followed with one or two numbers separated with a comma and put inside square brackets. The first number will be used as the QoS and the second as the RETAIN MQTT parameters.
 
@@ -56,15 +56,15 @@ For exemple, here is a topic name followed with QoS and Retain values:
 
 For more details, see [here](https://www.hivemq.com/blog/mqtt-essentials-part-6-mqtt-quality-of-service-levels/).
 
-#### Separator
+#### 1.3 Separator
 
 The separator can be `;` for **JSON diet** content (see the description below), or `|` for plain content.
 
-#### Plain content
+#### 1.4 Plain content
 
 No specific processing is done on plain content: it is sent as-is to the MQTT broker.
 
-#### JSON diet
+#### 1.5 JSON diet
 
 The **JSON diet** format is a version of the JSON format for which double quotes around simple strings are omitted.
 
@@ -86,7 +86,7 @@ will be translated to the following JSON string:
 
 The JSON diet process doesn't expect UTF-8 (Unicode) characters. Augmented ASCII (8 bits characters) is OK.
 
-### Configuration
+### 2. Configuration
 
 The ESP32 Gateway configuration is done through the menuconfig capability associated with ESP-IDF. The following PlatformIO's menu option can be used to access the menuconfig application: `Platform → Run Menuconfig`.
 
@@ -127,11 +127,11 @@ For the Wifi sub-system:
 - **Wifi AP Password**: Password associated with the gateway Wifi AP for gateway discovery by sensors. Can be empty for an open AP.
 - **Wifi AP Authorization Mode**: Authorization mode to be used for the gateway AP. Can be WEP, WPA, WPA2, WPA3.
 
-### Channel usage
+### 3. Channel usage
 
 ESP-NOW relies on the use of a single channel to transmit packets between devices. To allow the gateway to transmit packets to the MQTT server, it needs to connect to the Wifi network as a station-mode device. As such, the Wifi router channel is used to communicate. As the ESP32 only has a single Wifi antenna, the same channel must be used for both Station connection to the Wifi network and ESP-NOW. It is then important to freeze the router channel (usually to one of 1, 6, or 11 to mitigate interference between channels) and configure all ESP-NOW devices to use that channel.
 
-### ESP-NOW Encrypted devices
+### 4. ESP-NOW Encrypted devices
 
 Pre-defined peer-encrypted devices can be identified in the `src/global.cpp` file. A list of keys (6 maximum) and the list of mac addresses/key pointers are used to identify the peers to be added at boot time. The table's actual sizes are located in `include/global.hpp` and can be adjusted if needed (namely the LMK_KEY_COUNT, and ENCRYPTED_DEVICES_COUNT constants). 
 
@@ -149,7 +149,7 @@ For now, this is a one-way capability (sensors only). The following enhancements
 4) Gateway's web-based config access and logging
 5) OTA support
 
-### Copyright (c) 2022 Guy Turcotte
+### 5. Copyright (c) 2022 Guy Turcotte
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this project and associated documentation files (the "Project Content"), to deal in the Project without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Project Content, and to permit persons to whom the Project Content is furnished to do so, subject to the following conditions:
 
