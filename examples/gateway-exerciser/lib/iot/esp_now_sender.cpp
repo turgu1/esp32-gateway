@@ -5,6 +5,7 @@
 #ifdef CONFIG_IOT_ENABLE_ESP_NOW
 
 #include <cstring>
+#include <cmath>
 #include <esp_crc.h>
 #include <esp_wifi.h>
 #include <esp_system.h>
@@ -167,7 +168,8 @@ esp_err_t ESPNowSender::search_ap()
 
   gateway_access_error_count++;
   ap_failed = true;
-  int wait_time = gateway_access_error_count * gateway_access_error_count * 10;
+  int wait_time = pow(gateway_access_error_count, 4) * 10;
+  if (wait_time > 86400) wait_time = 86400; // Don't wait for more than one day.
   ESP_LOGE(TAG, "Unable to find Gateway Access Point. Waiting for %d seconds...", wait_time);
 
   esp_deep_sleep(wait_time * 1e6);
