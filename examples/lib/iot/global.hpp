@@ -10,7 +10,7 @@
 #endif
 
 #ifdef CONFIG_IOT_ENABLE_ESP_NOW
-  #include "esp_now_sender.hpp"
+  #include "esp_now.hpp"
 #endif
 
 #ifndef __GLOBAL__
@@ -22,14 +22,14 @@
   #endif
 
   #ifdef CONFIG_IOT_ENABLE_UDP
-    #ifndef __UDP_SENDER__
-      extern UDPSender udp;
+    #ifndef __UDP__
+      extern UDP udp;
     #endif
   #endif
 
   #ifdef CONFIG_IOT_ENABLE_ESP_NOW
-    #ifndef __ESP_NOW_SENDER__
-      extern ESPNowSender esp_now;
+    #ifndef __ESP_NOW__
+      extern ESPNow esp_now;
     #endif
   #endif
 #endif

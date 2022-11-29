@@ -9,7 +9,7 @@
 class App
 {
   private:
-    static constexpr char const * TAG = "Main App";
+    static constexpr char const * TAG = "App Class";
 
     static xTaskHandle task;
     static void main_task(void * params);

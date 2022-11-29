@@ -14,7 +14,7 @@
 class UDPReceiver
 {
   private:
-    static constexpr char const * TAG = "UDP Receiver";
+    static constexpr char const * TAG = "UDPReceiver Class";
 
     static xTaskHandle   task;
     static QueueHandle_t msg_queue;

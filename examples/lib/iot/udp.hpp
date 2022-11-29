@@ -6,10 +6,10 @@
 
 #include <lwip/sockets.h>
 
-class UDPSender
+class UDP
 {
   private:
-    static constexpr char const * TAG = "UDP Sender";
+    static constexpr char const * TAG = "UDP Class";
 
     int                sock;
     struct sockaddr_in dest_addr;

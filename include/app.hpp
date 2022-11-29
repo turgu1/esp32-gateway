@@ -20,7 +20,7 @@
 class App
 {
   private:
-    static constexpr char const * TAG = "Main App";
+    static constexpr char const * TAG = "App Class";
     
     static Wifi        wifi;
     static MQTT        mqtt;

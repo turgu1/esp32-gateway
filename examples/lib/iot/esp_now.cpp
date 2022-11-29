@@ -12,19 +12,19 @@
 #include <assert.h>
 
 #include "utils.hpp"
-#include "esp_now_sender.hpp"
+#include "esp_now.hpp"
 
-#define __ESP_NOW_SENDER__
+#define __ESP_NOW__
 #include "global.hpp"
 
 RTC_NOINIT_ATTR uint32_t gateway_access_error_count;
 RTC_NOINIT_ATTR bool     ap_failed;
 
-bool                    ESPNowSender::abort             = false;
-QueueHandle_t           ESPNowSender::send_queue_handle = nullptr;
-ESPNowSender::SendEvent ESPNowSender::send_event;
+bool              ESPNow::abort             = false;
+QueueHandle_t     ESPNow::send_queue_handle = nullptr;
+ESPNow::SendEvent ESPNow::send_event;
 
-esp_err_t ESPNowSender::init()
+esp_err_t ESPNow::init()
 {
   esp_err_t status;
 
@@ -89,7 +89,7 @@ esp_err_t ESPNowSender::init()
   return status;
 }
 
-void ESPNowSender::send_handler(const uint8_t * mac_addr, esp_now_send_status_t status)
+void ESPNow::send_handler(const uint8_t * mac_addr, esp_now_send_status_t status)
 {
   ESP_LOGD(TAG, "Send Event for " MACSTR ": %s.", MAC2STR(mac_addr), status == ESP_NOW_SEND_SUCCESS ? "OK" : "FAILED");
 
@@ -102,7 +102,7 @@ void ESPNowSender::send_handler(const uint8_t * mac_addr, esp_now_send_status_t 
   }
 }
 
-esp_err_t ESPNowSender::send(const uint8_t * data, int len)
+esp_err_t ESPNow::send(const uint8_t * data, int len)
 {
   esp_err_t status;
   static struct {
@@ -130,7 +130,7 @@ esp_err_t ESPNowSender::send(const uint8_t * data, int len)
   return status;
 }
 
-esp_err_t ESPNowSender::search_ap()
+esp_err_t ESPNow::search_ap()
 {
   wifi_scan_config_t config;
   wifi_ap_record_t * ap_records;
@@ -177,7 +177,7 @@ esp_err_t ESPNowSender::search_ap()
   return ESP_FAIL;
 }
 
-void ESPNowSender::prepare_for_deep_sleep()
+void ESPNow::prepare_for_deep_sleep()
 {
   esp_now_unregister_send_cb();
   esp_now_deinit();

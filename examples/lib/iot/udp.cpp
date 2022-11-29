@@ -8,9 +8,9 @@
 #include <netdb.h>
 
 #include "utils.hpp"
-#include "udp_sender.hpp"
+#include "udp.hpp"
 
-esp_err_t UDPSender::init()
+esp_err_t UDP::init()
 {
   esp_log_level_set(TAG, CONFIG_IOT_LOG_LEVEL);
 
@@ -47,7 +47,7 @@ esp_err_t UDPSender::init()
   return status;
 }
 
-esp_err_t UDPSender::send(const uint8_t * data, int len)
+esp_err_t UDP::send(const uint8_t * data, int len)
 {
   esp_err_t status = ESP_OK;
 
@@ -79,7 +79,7 @@ esp_err_t UDPSender::send(const uint8_t * data, int len)
   return status;
 }
 
-void UDPSender::prepare_for_deep_sleep()
+void UDP::prepare_for_deep_sleep()
 {
   if (sock != -1) {
     ESP_LOGE(TAG, "Shutting down socket and restarting...");

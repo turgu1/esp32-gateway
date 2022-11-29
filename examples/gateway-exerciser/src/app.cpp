@@ -34,14 +34,14 @@ esp_err_t App::init()
   #endif
 
   #ifdef CONFIG_IOT_ENABLE_UDP
-    // UDPSender initialization
+    // UDP initialization
 
     status = udp.init();
     ESP_ERROR_CHECK(status);
   #endif
 
   #ifdef CONFIG_IOT_ENABLE_ESP_NOW
-    // EspNowSender initialization
+    // EspNow initialization
 
     status = esp_now.init();
     ESP_ERROR_CHECK(status);
@@ -91,7 +91,7 @@ void App::main_task(void * params)
   #ifdef CONFIG_IOT_ENABLE_ESP_NOW
     xQueueHandle send_handle = esp_now.get_sent_queue_handle();
     esp_now.send((const uint8_t *) msg, len);
-    ESPNowSender::SendEvent evt;
+    ESPNow::SendEvent evt;
     if (send_handle != nullptr) {
       if (xQueueReceive(send_handle, &evt, pdMS_TO_TICKS(1000)) != pdTRUE) {
         ESP_LOGE(TAG, "No answer after packet sent.");

@@ -13,7 +13,7 @@ class NVSMgr
     };
 
   private:
-    static constexpr char const * TAG            = "NVSMgr";
+    static constexpr char const * TAG            = "NVSMgr Class";
     static constexpr char const * NAMESPACE      = "Exerciser";
     static constexpr char const * PARTITION_NAME = "nvs";
 

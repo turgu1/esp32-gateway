@@ -3,7 +3,7 @@
 
 #include "app.hpp"
 
-const char * TAG = "Esp-Now Sender";
+const char * TAG = "Exerciser";
 
 App app;
 

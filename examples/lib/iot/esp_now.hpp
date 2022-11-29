@@ -7,7 +7,7 @@
 #include <freertos/FreeRTOS.h>
 #include <esp_now.h>
 
-class ESPNowSender
+class ESPNow
 {
   public:
     struct SendEvent {
@@ -16,7 +16,7 @@ class ESPNowSender
     };
 
   private:
-    static constexpr char const * TAG = "ESP-NOW Sender";
+    static constexpr char const * TAG = "ESPNow Class";
 
     static bool          abort;
     static QueueHandle_t send_queue_handle;

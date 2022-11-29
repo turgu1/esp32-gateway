@@ -7,11 +7,11 @@ Wifi   wifi;
 NVSMgr nvs_mgr;
 
 #ifdef CONFIG_IOT_ENABLE_UDP
-  UDPSender udp;
+  UDP udp;
 #endif
 
 #ifdef CONFIG_IOT_ENABLE_ESP_NOW
-  ESPNowSender esp_now;
+  ESPNow esp_now;
 #endif
 
 RTC_NOINIT_ATTR uint32_t sequence_number;

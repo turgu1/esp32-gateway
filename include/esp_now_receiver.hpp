@@ -12,7 +12,7 @@
 class ESPNowReceiver
 {
   private:
-    static constexpr char const * TAG = "ESP-NOW Receiver";
+    static constexpr char const * TAG = "ESPNowReceiver Class";
 
     static QueueHandle_t msg_queue;
     static bool          abort;
