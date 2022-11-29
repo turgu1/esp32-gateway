@@ -22,7 +22,7 @@ All options for the Gateway will be found under the menuconfig entry named `Gate
 
 Here is the list of the configuration items:
 
-- **Log Level**: Max log level used by the exerciser to report various log information on the USB port.
+- **Log Level**: Max log level used by the exerciser to report various log information on the USB port. The ESP-IDF maximum log level may require to be adjusted according to this item. It can be found in menuconfig at the following location: `Component config > Log output > Maximum log verbosity`.
 - **MQTT Topic Suffix**: The topic suffix that will be used by the gateway to generate the topic to be sent to the MQTT broker.
 - **Transmission Protocol**: The protocol to be used to transmit packets to the ESP32 Gateway. One of **UDP** or **ESP-NOW**.
 

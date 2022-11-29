@@ -54,7 +54,7 @@ All options for the Gateway will be found under the menuconfig entry named `ESP-
 Here is the list of the configuration items:
 
 - **Message queue size**: The maximum number of messages queued in the gateway waiting to be sent to the MQTT server.
-- **Log Level**: Maximum log level used by the gateway to report various log information on the USB port.
+- **Log Level**: Maximum log level used by the gateway to report various log information on the USB port. The ESP-IDF maximum log level may require to be adjusted according to this item. It can be found in menuconfig at the following location: `Component config > Log output > Maximum log verbosity`.
 - **Enable UDP packet reception**: When enabled, a task will wait for UDP packets for transmission to the MQTT broker.
 - **Enable ESP-NOW packet reception**: When enabled, a task will wait for ESP-NOW packets for transmission to the MQTT broker.
 
