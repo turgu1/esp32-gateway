@@ -87,7 +87,8 @@ menu "Gateway Exerciser"
             bool "Encryption enabled"
             default "n"
             help
-                Set if this device is using packet encryption.
+                Set if this device is using packet encryption. If set, the gateway
+                internal table of encrypted devices must be modified accordingly.
 
         config EXERCISER_ESPNOW_LMK
             depends on EXERCISER_ENCRYPT
@@ -130,7 +131,7 @@ menu "Gateway Exerciser"
             string "Wifi Gateway SSID"
             default "your_wifi_gateway_ssid"
             help
-                SSID associated to Wifi as defined in your gateway. Will be used 
+                SSID associated with Wifi as defined in your gateway. Will be used 
                 to find the gateway MAC address when unknown. 
 
         config EXERCISER_WIFI_ESP_NOW_STA_PASS
@@ -138,7 +139,7 @@ menu "Gateway Exerciser"
             string "Wifi Gateway Password"
             default "your_wifi_gateway_password"
             help
-                Password associated to Wifi as defined in your gateway.
+                Password associated with Wifi as defined in your gateway.
                 Can be empty.
 
         config EXERCISER_WIFI_UDP_STA_SSID

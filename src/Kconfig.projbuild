@@ -32,14 +32,14 @@ menu "ESP-32 Gateway Configuration"
         bool "Enable UDP packet reception"
         default "y"
         help
-            When enable, a task will wait for UDP packets for transmission
+            When enabled, a task will wait for UDP packets for transmission
             to the MQTT broker.
 
     config GATEWAY_ENABLE_ESP_NOW
         bool "Enable ESP-NOW packet reception"
         default "y"
         help
-            When enable, a task will wait for ESP-NOW packets for
+            When enabled, a task will wait for ESP-NOW packets for
             transmission to the MQTT broker.
 
     menu "UDP Protocol"
@@ -145,7 +145,7 @@ menu "ESP-32 Gateway Configuration"
             string "MQTT User Password"
             default "your_mqtt_password"
             help
-                Password associated to username as defined in the MQTT server configuration.
+                Password associated with username as defined in the MQTT server configuration.
     endmenu
     
     menu "Wifi"
@@ -181,7 +181,7 @@ menu "ESP-32 Gateway Configuration"
             string "Wifi AP SSID"
             default "your_wifi_ap_ssid"
             help
-                SSID associated to the gateway Wifi AP for gateway 
+                SSID associated with the gateway Wifi AP for gateway 
                 discovery by sensors.
 
         config GATEWAY_WIFI_AP_PASS
@@ -189,7 +189,7 @@ menu "ESP-32 Gateway Configuration"
             string "Wifi AP Password"
             default "your_wifi_ap_password"
             help
-                Password associated to the gateway Wifi AP for gateway
+                Password associated with the gateway Wifi AP for gateway
                 discovery by sensors. Can be empty for an open AP.
 
         choice

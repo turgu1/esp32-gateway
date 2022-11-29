@@ -53,10 +53,10 @@ All options for the Gateway will be found under the menuconfig entry named `ESP-
 
 Here is the list of the configuration items:
 
-- **Message queue size**: The maximum number of messages queud in the gateway waiting to be sent to the MQTT server.
+- **Message queue size**: The maximum number of messages queued in the gateway waiting to be sent to the MQTT server.
 - **Log Level**: Maximum log level used by the gateway to report various log information on the USB port.
-- **Enable UDP packet reception**: When enable, a task will wait for UDP packets for transmission to the MQTT broker.
-- **Enable ESP-NOW packet reception**: When enable, a task will wait for ESP-NOW packets for transmission to the MQTT broker.
+- **Enable UDP packet reception**: When enabled, a task will wait for UDP packets for transmission to the MQTT broker.
+- **Enable ESP-NOW packet reception**: When enabled, a task will wait for ESP-NOW packets for transmission to the MQTT broker.
 
 For the UDP Protocol:
 - **UDP Port**: The UDP Port to be used by devices to transmit packets to the gateway.
@@ -75,14 +75,14 @@ For the MQTT Protocol:
 - **MQTT Default Retain value**: The MQTT Retain value to use when sending messages to the MQTT server.
 - **MQTT Username**: Username as defined in the MQTT server configuration.
 - **MQTT Client Identification**: MQTT Client Id used by the gateway.
-- **MQTT User Password**: Password associated to username as defined in the MQTT server configuration.
+- **MQTT User Password**: Password associated with username as defined in the MQTT server configuration.
 
 For the Wifi sub-system:
 - **Wifi Router SSID**: SSID as defined in the Wifi Router.
 - **Wifi Router Password**: Password as defined in the Wifi Router.
 - **Wifi Router Authorization Mode**: Authorization mode as defined in your router. Can be WEP, WPA, WPA2, WPA3.
-- **Wifi AP SSID**: SSID associated to the gateway Wifi AP for gateway discovery by sensors.
-- **Wifi AP Password**: Password associated to the gateway Wifi AP for gateway discovery by sensors. Can be empty for an open AP.
+- **Wifi AP SSID**: SSID associated with the gateway Wifi AP for gateway discovery by sensors.
+- **Wifi AP Password**: Password associated with the gateway Wifi AP for gateway discovery by sensors. Can be empty for an open AP.
 - **Wifi AP Authorization Mode**: Authorization mode to be used for the gateway AP. Can be WEP, WPA, WPA2, WPA3.
 
 ### Channel usage
@@ -91,7 +91,7 @@ ESP-NOW relies on the use of a single channel to transmit packets between device
 
 ### ESP-NOW Encrypted devices
 
-Pre-defined peer-encrypted devices can be identified in the `src/global.cpp` file. A list of keys (6 maximum) and the list of mac addresses/key pointers are used to identify the peers to be added at boot time. The table's actual sizes are located in `include/globl.hpp` and can be adjusted if needed (namely the LMK_KEY_COUNT, and ENCRYPTED_DEVICES_COUNT constants). 
+Pre-defined peer-encrypted devices can be identified in the `src/global.cpp` file. A list of keys (6 maximum) and the list of mac addresses/key pointers are used to identify the peers to be added at boot time. The table's actual sizes are located in `include/global.hpp` and can be adjusted if needed (namely the LMK_KEY_COUNT, and ENCRYPTED_DEVICES_COUNT constants). 
 
 This is to simplify the interaction between the gateway and the sensors that require encryption. Note that the number of encrypted devices is limited to 6. No specific protocol is then required, the sensors can immediately send encrypted packets, optimizing power usage. 
  
