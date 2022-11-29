@@ -35,7 +35,9 @@ For example, here is a complete packet (without the CRC) that uses JSON as its c
 
 #### 1.1 Sensor's Topic name
 
-The sensor's topic name is used by the gateway to generate a complete topic name of the form `<topic name prefix>/<sensor's topic name>/<topic name suffix>`. 
+The sensor's topic name is used by the gateway to generate a complete topic name of the following form: 
+
+```<topic name prefix><sensor's topic name><topic name suffix>``` 
 
 For example, if the topic name prefix is `iot/`, the topic name suffix is `/state`, and the sensor's topic name is `home_temp` the MQTT topic will be `iot/home_temp/state`. Both topic name prefix and suffix are adjustable through `menuconfig`. 
 
