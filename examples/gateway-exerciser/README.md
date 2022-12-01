@@ -1,8 +1,8 @@
 ### Simple ESP-IDF based ESP-NOW/UDP Exerciser
 
-2022-11-29 - Version 0.2.0
+2022-12-01 - Version 0.3.0
 
-Note: This is still under heavy modification. Must be condidered as BETA-Level code.
+[NOT READY YET - IN DEVELOPMENT]
 
 This is an exerciser application for the ESP32 Gateway. It sends simple packets every 10 seconds to the gateway. Between transfers, the exerciser is put into deep sleep. The following aspects can be put to test through configuration parameters:
 
@@ -23,7 +23,7 @@ All options for the Gateway will be found under the menuconfig entry named `Gate
 Here is the list of the configuration items:
 
 - **Log Level**: Max log level used by the exerciser to report various log information on the USB port. The ESP-IDF maximum log level may require to be adjusted according to this item. It can be found in menuconfig at the following location: `Component config → Log output → Maximum log verbosity`.
-- **MQTT Topic Suffix**: The topic suffix that will be used by the gateway to generate the topic to be sent to the MQTT broker.
+- **MQTT Topic Name**: The topic name that will be used by the gateway to generate the topic to be sent to the MQTT broker.
 - **Transmission Protocol**: The protocol to be used to transmit packets to the ESP32 Gateway. One of **UDP** or **ESP-NOW**.
 
 For the UDP Protocol:
