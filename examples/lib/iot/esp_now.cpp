@@ -17,6 +17,8 @@
 #define __ESP_NOW__
 #include "global.hpp"
 
+#undef __ESP_NOW__
+
 RTC_NOINIT_ATTR uint32_t gateway_access_error_count;
 RTC_NOINIT_ATTR bool     ap_failed;
 

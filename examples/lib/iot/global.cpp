@@ -3,8 +3,13 @@
 
 #include "global.hpp"
 
+IOT    iot;
 Wifi   wifi;
 NVSMgr nvs_mgr;
+
+#ifdef CONFIG_IOT_BATTERY_LEVEL
+  Battery battery;
+#endif
 
 #ifdef CONFIG_IOT_ENABLE_UDP
   UDP udp;

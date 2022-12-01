@@ -17,7 +17,9 @@ esp_err_t App::init()
     error_count = 0;
   }
 
-  ESP_ERROR_CHECK(iot.init());
+  iot.init();
+
+  ESP_LOGD(TAG, "Creating Main Task.");
 
   if (xTaskCreate(main_task, "main_task", 4*4096, nullptr, 5, &task) != pdPASS) {
     ESP_LOGE(TAG, "Unable to create main_task.");
@@ -29,6 +31,8 @@ esp_err_t App::init()
 
 void App::main_task(void * params)
 {
+  ESP_LOGD(TAG, "Start of Main Task...");
+
   bool toggle = false;
   char msg[100];
 
@@ -75,5 +79,5 @@ void App::main_task(void * params)
 
   esp_deep_sleep(10*1e6); // never return
 
-  ESP_LOGE(TAG, "Leaving Main Task.");
+  ESP_LOGE(TAG, "Leaving Main Task!!");
 }

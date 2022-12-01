@@ -1,6 +1,6 @@
 ### ESP32-Gateway - ESP32 based ESP-NOW/UDP → MQTT gateway
 
-2022-11-29 - Version 0.2.0
+2022-12-30 - Version 0.3.0
 
 Note: This is still under heavy modification. Must be condidered as BETA-Level code.
 
@@ -56,7 +56,7 @@ For exemple, here is a topic name followed with QoS and Retain values:
 
 ```external/temp[1,1]```
 
-For more details, see [here](https://www.hivemq.com/blog/mqtt-essentials-part-6-mqtt-quality-of-service-levels/).
+For more details, see [here](https://www.hivemq.com/blog/mqtt-essentials-part-6-mqtt-quality-of-service-levels/) and [here](https://www.hivemq.com/blog/mqtt-essentials-part-8-retained-messages/).
 
 #### 1.3 Separator
 
