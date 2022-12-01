@@ -17,7 +17,7 @@ esp_err_t App::init()
     error_count = 0;
   }
 
-  ESP_ERROR_CHECK(iot.init());
+  ESP_ERROR_CHECK(iot.init(nullptr));
 
   if (xTaskCreate(main_task, "main_task", 4*4096, nullptr, 5, &task) != pdPASS) {
     ESP_LOGE(TAG, "Unable to create main_task.");
