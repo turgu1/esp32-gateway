@@ -205,9 +205,12 @@ esp_err_t Wifi::init()
       memcpy(wifi_ap_cfg.ap.password, CONFIG_GATEWAY_WIFI_AP_PASS, std::min(strlen(CONFIG_GATEWAY_WIFI_AP_PASS), sizeof(wifi_ap_cfg.ap.password)));
       wifi_ap_cfg.ap.authmode       = WIFI_AP_AUTH_MODE;
       wifi_ap_cfg.ap.ssid_len       = strlen(CONFIG_GATEWAY_WIFI_AP_SSID);
-      wifi_ap_cfg.ap.max_connection = 0;
+      wifi_ap_cfg.ap.max_connection = 5;
       wifi_ap_cfg.ap.channel        = CONFIG_GATEWAY_CHANNEL;
+      wifi_ap_cfg.ap.ssid_hidden    = 0;
 
+      ESP_LOGD(TAG, "AP ssid: %s", wifi_ap_cfg.ap.ssid);
+      
       if (strlen(CONFIG_GATEWAY_WIFI_AP_PASS) == 0) {
         wifi_ap_cfg.ap.authmode = WIFI_AUTH_OPEN;
       }

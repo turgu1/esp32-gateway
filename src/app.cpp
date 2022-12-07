@@ -85,6 +85,18 @@ esp_err_t App::init()
 
 void App::main_task(void * params)
 {
+  char * topic = (char *) malloc(sizeof(CONFIG_GATEWAY_MQTT_TOPIC_PREFIX) + sizeof(CONFIG_GATEWAY_MQTT_TOPIC_SUFFIX) + sizeof("gateway") + 1);
+
+  strcpy(topic, CONFIG_GATEWAY_MQTT_TOPIC_PREFIX);
+  strcat(topic, "gateway");
+  strcat(topic, CONFIG_GATEWAY_MQTT_TOPIC_SUFFIX);
+
+  while (mqtt.publish(topic, (uint8_t *) "ESP32 GATEWAY STARTUP", 21, 0, 0) == ESP_FAIL) {
+    vTaskDelay(pdMS_TO_TICKS(1000));
+  }
+
+  free(topic);
+
   while (true) {
 
     Message msg;
